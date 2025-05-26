@@ -1,4 +1,6 @@
 import pytest
+from exporter.clients.log_reader import read_last_n_lines
+import subprocess
 from exporter.clients.log_reader import (
     parse_block_height,
     calculate_keyword_abundance
@@ -28,3 +30,11 @@ def test_calculate_keyword_abundance_found():
 def test_calculate_keyword_abundance_not_found():
     log_data = "Nothing relevant"
     assert calculate_keyword_abundance(log_data, "Block", "abc123") == 0.0
+
+def test_read_last_n_lines_fails(monkeypatch):
+    def mock_run(*args, **kwargs):
+        raise subprocess.CalledProcessError(1, cmd="tail")
+
+    monkeypatch.setattr(subprocess, "run", mock_run)
+    with pytest.raises(RuntimeError):
+        read_last_n_lines("/tmp/invalid.log")

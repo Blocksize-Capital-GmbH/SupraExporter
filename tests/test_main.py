@@ -1,11 +1,7 @@
-def run_forever():
-    print("Running forever...")
-    while True:
-        time.sleep(60)
+from unittest.mock import patch
+from exporter import main
 
-def start_http_server_with_collectors(port):
-    ...
-    start_http_server(port, registry=registry)
-    print(f"Starting Prometheus exporter on port {port}...")
-
-    run_forever()
+@patch("exporter.main.start_http_server_with_collectors")
+def test_main_entrypoint(mock_start):
+    main.main()
+    mock_start.assert_called_once()

@@ -1,31 +1,16 @@
 from unittest.mock import patch
-import pytest
+from importlib import reload
+import exporter.clients.rpc_client as rpc_module
 
 @patch("requests.get")
-def test_get_block_height_success(mock_get, monkeypatch):
-    monkeypatch.setenv("RPC_URL", "http://mock-rpc")
-    monkeypatch.setenv("ROLE", "rpc")
-    monkeypatch.setenv("RPC_LOG_PATH", "/tmp/mock.log")
-
-    from importlib import reload
-    import exporter.config
-    reload(exporter.config)  # reload to apply monkeypatched env
-    from exporter.clients.rpc_client import get_block_height
-
+def test_get_block_height_success(mock_get, mock_env_rpc):
+    reload(rpc_module)  # re-evaluate config after env setup
     mock_get.return_value.json.return_value = {"height": 12345}
     mock_get.return_value.raise_for_status.return_value = None
 
-    assert get_block_height() == 12345
+    assert rpc_module.get_block_height() == 12345
 
 @patch("requests.get", side_effect=Exception("fail"))
-def test_get_block_height_fail(mock_get, monkeypatch):
-    monkeypatch.setenv("RPC_URL", "http://mock-rpc")
-    monkeypatch.setenv("ROLE", "rpc")
-    monkeypatch.setenv("RPC_LOG_PATH", "/tmp/mock.log")
-
-    from importlib import reload
-    import exporter.config
-    reload(exporter.config)
-    from exporter.clients.rpc_client import get_block_height
-
-    assert get_block_height() == 0
+def test_get_block_height_failure(mock_get, mock_env_rpc):
+    reload(rpc_module)
+    assert rpc_module.get_block_height() == 0
