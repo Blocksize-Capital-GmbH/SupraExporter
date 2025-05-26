@@ -1,12 +1,30 @@
-from exporter.clients.log_reader import parse_block_height
+import pytest
+from exporter.clients.log_reader import (
+    parse_block_height,
+    calculate_keyword_abundance
+)
 
-def test_parse_block_height_valid():
-    log = """
-    [INFO] Some unrelated log
-    Block height: (12345678)
+def test_parse_block_height_found():
+    log_data = """
+    Some random logs
+    Block height: (123456)
+    More lines
     """
-    assert parse_block_height(log) == 12345678
+    assert parse_block_height(log_data) == 123456
 
-def test_parse_block_height_invalid():
-    log = "No height present"
-    assert parse_block_height(log) == 0
+def test_parse_block_height_not_found():
+    log_data = "No height pattern here"
+    assert parse_block_height(log_data) == 0
+
+def test_calculate_keyword_abundance_found():
+    log_data = """
+    Info Block abc123
+    Info Block abc123
+    Info Block otherkey
+    """
+    ratio = calculate_keyword_abundance(log_data, "Block", "abc123")
+    assert round(ratio, 2) == 0.67
+
+def test_calculate_keyword_abundance_not_found():
+    log_data = "Nothing relevant"
+    assert calculate_keyword_abundance(log_data, "Block", "abc123") == 0.0
