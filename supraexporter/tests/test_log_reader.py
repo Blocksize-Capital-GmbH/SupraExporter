@@ -1,10 +1,13 @@
-import pytest
-from exporter.clients.log_reader import read_last_n_lines
 import subprocess
-from exporter.clients.log_reader import (
+
+import pytest
+
+from supraexporter.clients.log_reader import (
+    calculate_keyword_abundance,
     parse_block_height,
-    calculate_keyword_abundance
+    read_last_n_lines,
 )
+
 
 def test_parse_block_height_found():
     log_data = """
@@ -14,9 +17,11 @@ def test_parse_block_height_found():
     """
     assert parse_block_height(log_data) == 123456
 
+
 def test_parse_block_height_not_found():
     log_data = "No height pattern here"
     assert parse_block_height(log_data) == 0
+
 
 def test_calculate_keyword_abundance_found():
     log_data = """
@@ -27,9 +32,11 @@ def test_calculate_keyword_abundance_found():
     ratio = calculate_keyword_abundance(log_data, "Block", "abc123")
     assert round(ratio, 2) == 0.67
 
+
 def test_calculate_keyword_abundance_not_found():
     log_data = "Nothing relevant"
     assert calculate_keyword_abundance(log_data, "Block", "abc123") == 0.0
+
 
 def test_read_last_n_lines_fails(monkeypatch):
     def mock_run(*args, **kwargs):

@@ -1,8 +1,11 @@
-import requests
 import logging
-from exporter.config import config
+
+import requests
+
+from supraexporter.config import config
 
 logger = logging.getLogger(__name__)
+
 
 def get_public_block_height():
     try:

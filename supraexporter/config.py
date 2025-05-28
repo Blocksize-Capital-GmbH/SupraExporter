@@ -1,10 +1,12 @@
 import os
+
 from dotenv import load_dotenv
 
 # Load .env from the project root
 load_dotenv()
 
 VALID_ROLES = {"rpc", "validator", "both"}
+
 
 class Config:
     def __init__(self):
@@ -15,7 +17,7 @@ class Config:
         # Common
         self.port = int(os.getenv("EXPORTER_PORT", 9100))
         self.poll_interval = int(os.getenv("POLL_INTERVAL", 10))
-        self.public_rpc_url = os.getenv("PUBLIC_RPC_URL","https://rpc-testnet.supra.com/rpc/v1")
+        self.public_rpc_url = os.getenv("PUBLIC_RPC_URL", "https://rpc-testnet.supra.com/rpc/v1")
 
         # RPC node config (used in 'rpc' or 'both')
         self.rpc_url = os.getenv("RPC_URL")

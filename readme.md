@@ -1,12 +1,13 @@
 # Supra Metrics Exporter
 
-A lean, modular, and production-ready Prometheus exporter for the [Supra](https://supra.com/) blockchain.  
+A lean, modular, and production-ready Prometheus exporter for the [Supra](https://supra.com/) blockchain.
 This exporter collects metrics from:
 
 - 📡 RPC endpoints (e.g. block height)
 - 📜 Validator log files (e.g. block authored, view frequency)
 
 Supports all three deployment modes:
+
 - `rpc` – Export only RPC metrics
 - `validator` – Export only validator metrics
 - `both` – Export all metrics from a single node, if both clients run on same node
@@ -19,7 +20,7 @@ Supports all three deployment modes:
 
 ```bash
 git clone https://github.com/your-org/supra-metrics-exporter.git
-cd supra-metrics-exporter
+cd supra-metrics-supraexporter
 ```
 
 ### 2. Setup environment
@@ -39,7 +40,7 @@ poetry install
 ### 4. Run the exporter
 
 ```bash
-poetry run python -m exporter.main
+poetry run python -m supraexporter.main
 ```
 
 Exporter runs on [http://localhost:9100/metrics](http://localhost:9100/metrics)
@@ -49,9 +50,9 @@ Exporter runs on [http://localhost:9100/metrics](http://localhost:9100/metrics)
 ## 📥 Prometheus Integration
 
 ```yaml
-- job_name: 'supra-exporter'
+- job_name: "supra-supraexporter"
   static_configs:
-    - targets: ['localhost:9100']
+      - targets: ["localhost:9100"]
 ```
 
 ---
@@ -68,16 +69,16 @@ Exporter runs on [http://localhost:9100/metrics](http://localhost:9100/metrics)
 2. Save the following as `docker-compose.yml`:
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
-  supra-metrics-exporter:
-    image: yourdockerhub/supra-metrics-exporter:latest
-    container_name: supra_blockchain_metrics_exporter
-    network_mode: host
-    restart: unless-stopped
-    volumes:
-      - ./.env:/app/.env
+    supra-metrics-exporter:
+        image: yourdockerhub/supra-metrics-exporter:latest
+        container_name: supra_blockchain_metrics_exporter
+        network_mode: host
+        restart: unless-stopped
+        volumes:
+            - ./.env:/app/.env
 ```
 
 3. Run:
@@ -86,7 +87,8 @@ services:
 docker compose up -d
 ```
 
-Metrics will be available at:  
+Metrics will be available at:
+
 ```
 http://localhost:${EXPORTER_PORT}
 ```
@@ -99,7 +101,7 @@ http://localhost:${EXPORTER_PORT}
 docker run --network host \
   -v $(pwd)/.env:/app/.env \
   --name supra_exporter \
-  -d yourdockerhub/supra-metrics-exporter:latest
+  -d yourdockerhub/supra-metrics-supraexporter:latest
 ```
 
 ---
@@ -107,7 +109,6 @@ docker run --network host \
 ## ⚙️ Configuration
 
 All configuration is provided via a `.env` file. Here’s a minimal working example:
-
 
 ---
 
@@ -126,15 +127,15 @@ NETWORK_PUBKEY=0xYOURPUBKEY
 
 ## 📈 Exposed Metrics
 
-| Metric Name                      | Description                               |
-|----------------------------------|-------------------------------------------|
-| `supra_rpc_block_height`         | Latest block height from your RPC        |
-| `supra_public_rpc_block_height` | Latest block height from public RPC      |
-| `supra_rpc_health`              | 1 if within 10 blocks of public RPC      |
-| `supra_validator_block_height`  | Parsed from validator log                |
-| `supra_block_relative_abundance`| Ratio of 'Block' lines with your pubkey  |
-| `supra_view_relative_abundance` | Ratio of 'View' lines with your pubkey   |
-| `supra_validator_health`        | 1 if within 10 blocks of RPC             |
+| Metric Name                      | Description                             |
+| -------------------------------- | --------------------------------------- |
+| `supra_rpc_block_height`         | Latest block height from your RPC       |
+| `supra_public_rpc_block_height`  | Latest block height from public RPC     |
+| `supra_rpc_health`               | 1 if within 10 blocks of public RPC     |
+| `supra_validator_block_height`   | Parsed from validator log               |
+| `supra_block_relative_abundance` | Ratio of 'Block' lines with your pubkey |
+| `supra_view_relative_abundance`  | Ratio of 'View' lines with your pubkey  |
+| `supra_validator_health`         | 1 if within 10 blocks of RPC            |
 
 ---
 

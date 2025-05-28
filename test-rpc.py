@@ -1,4 +1,4 @@
-from exporter.clients.rpc_client import RPCClient
+from supraexporter.clients.rpc_client import RPCClient
 
 client = RPCClient("http://localhost:8545/rpc/v1")  # Replace with your actual endpoint if needed
 

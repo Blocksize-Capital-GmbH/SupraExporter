@@ -1,12 +1,19 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from prometheus_client import start_http_server, CollectorRegistry, generate_latest, CONTENT_TYPE_LATEST
+from http.server import BaseHTTPRequestHandler
 
-from exporter.config import config
-from exporter.collectors.rpc_collector import RpcCollector
-from exporter.collectors.validator_collector import ValidatorCollector
-from exporter.collectors.common_collector import CommonCollector
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    CollectorRegistry,
+    generate_latest,
+    start_http_server,
+)
+
+from supraexporter.collectors.common_collector import CommonCollector
+from supraexporter.collectors.rpc_collector import RpcCollector
+from supraexporter.collectors.validator_collector import ValidatorCollector
+from supraexporter.config import config
 
 registry = CollectorRegistry()
+
 
 class MetricsHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -18,6 +25,7 @@ class MetricsHandler(BaseHTTPRequestHandler):
         else:
             self.send_response(404)
             self.end_headers()
+
 
 def start_http_server_with_collectors(port):
     registry.register(CommonCollector())  # Register first!
@@ -33,5 +41,6 @@ def start_http_server_with_collectors(port):
     print(f"Starting Prometheus exporter on port {port}...")
 
     import time
+
     while True:
         time.sleep(60)

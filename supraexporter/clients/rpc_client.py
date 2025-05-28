@@ -1,10 +1,12 @@
 import requests
-from exporter.config import config
+
+from supraexporter.config import config
+
 
 def get_block_height():
     try:
         # Ensure correct URL: append '/block' to the base RPC URL
-        base_url = config.rpc_url.rstrip("/")
+        base_url = (config.rpc_url or "").rstrip("/")
         url = f"{base_url}/block"
 
         response = requests.get(url, timeout=3)

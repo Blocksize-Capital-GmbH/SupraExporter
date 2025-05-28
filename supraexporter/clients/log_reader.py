@@ -1,14 +1,14 @@
-import subprocess
 import re
+import subprocess  # nosec
 
 
 def read_last_n_lines(filepath: str, n: int = 100000) -> str:
     try:
-        result = subprocess.run(
+        result = subprocess.run(  # nosec
             ["tail", "-n", str(n), filepath],
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         return result.stdout
     except subprocess.CalledProcessError as e:
@@ -16,8 +16,7 @@ def read_last_n_lines(filepath: str, n: int = 100000) -> str:
 
 
 def parse_block_height(log_data: str) -> int:
-    """
-    Extract the most recent block height from the log file.
+    """Extract the most recent block height from the log file.
     Expected pattern: "Block height: (12345678)"
     """
     pattern = re.compile(r"Block height: \((\d+)\)")
@@ -29,8 +28,7 @@ def parse_block_height(log_data: str) -> int:
 
 
 def calculate_keyword_abundance(log_data: str, keyword: str, pubkey: str) -> float:
-    """
-    Calculate how often the given keyword appears with the pubkey
+    """Calculate how often the given keyword appears with the pubkey
     compared to total lines with the keyword.
     """
     lines = log_data.splitlines()

@@ -1,19 +1,25 @@
 from prometheus_client.core import GaugeMetricFamily
-from exporter.utils.public_rpc import get_public_block_height
-from exporter.clients.log_reader import (
-    read_last_n_lines,
-    parse_block_height,
-    calculate_keyword_abundance,
-)
-from exporter.config import config
-from exporter.utils.public_block_state import public_block_height
+from prometheus_client.registry import Collector
 
-class ValidatorCollector:
+from supraexporter.clients.log_reader import (
+    calculate_keyword_abundance,
+    parse_block_height,
+    read_last_n_lines,
+)
+from supraexporter.config import config
+from supraexporter.utils.public_rpc import get_public_block_height
+
+
+class ValidatorCollector(Collector):
     def collect(self):
         try:
+            assert config.validator_log_path is not None  # nosec
             log_data = read_last_n_lines(config.validator_log_path)
 
             validator_height = parse_block_height(log_data)
+            if not config.network_pubkey:
+                raise ValueError("Missing NETWORK_PUBKEY")
+
             block_abundance = calculate_keyword_abundance(log_data, "Block", config.network_pubkey)
             view_abundance = calculate_keyword_abundance(log_data, "View", config.network_pubkey)
 
@@ -35,7 +41,11 @@ class ValidatorCollector:
 
             public_height = get_public_block_height()
             healthy = (
-                1.0 if validator_height and public_height and abs(validator_height - public_height) <= 10 else 0.0
+                1.0
+                if validator_height
+                and public_height
+                and abs(validator_height - public_height) <= 10
+                else 0.0
             )
             yield GaugeMetricFamily(
                 "supra_validator_health",

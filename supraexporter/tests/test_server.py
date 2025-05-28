@@ -1,10 +1,11 @@
-from http.server import HTTPServer
-from threading import Thread
-import requests
 import time
+from threading import Thread
+
+import requests
+
 
 def test_metrics_endpoint_starts(monkeypatch):
-    from exporter.server import start_http_server_with_collectors
+    from supraexporter.server import start_http_server_with_collectors
 
     monkeypatch.setenv("ROLE", "rpc")
     monkeypatch.setenv("RPC_URL", "http://mock-rpc")

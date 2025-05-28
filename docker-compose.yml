@@ -1,10 +1,10 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  supra-metrics-exporter:
-    build: .
-    container_name: supra_blockchain_metrics_exporter
-    network_mode: host
-    restart: unless-stopped
-    volumes:
-      - ./.env:/app/.env
+    supra-metrics-exporter:
+        build: .
+        container_name: supra_blockchain_metrics_exporter
+        network_mode: host
+        restart: unless-stopped
+        volumes:
+            - ./.env:/app/.env

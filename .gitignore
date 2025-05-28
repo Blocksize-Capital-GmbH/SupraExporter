@@ -13,3 +13,4 @@ venv/
 
 # Coverage reports
 .coverage
+node_modules

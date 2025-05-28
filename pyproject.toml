@@ -34,32 +34,40 @@ pytest-cov = "^6.1.1"
 black = "^25.1.0"
 ruff = "^0.11.11"
 mypy = "^1.15.0"
+types-requests = "^2.32.0.20250515"
 
 [tool.black]
 line-length = 100
 target-version = ["py312"]
 
-[tool.ruff]
-line-length = 100
-target-version = "py312"
-exclude = ["__pycache__", ".venv", "build", "dist"]
-extend-select = ["I", "N", "B", "C4", "ERA", "F", "TID", "UP"]
-
-[tool.ruff.lint]
-select = ["ALL"]
-ignore = [
-  "D100",  # missing docstring in public module
-  "D104",  # missing docstring in public package
-  "ANN101", "ANN102",  # self/cls type annotations
-  "T201",  # allow print statements for now
-]
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
 
 [tool.mypy]
 python_version = "3.12"
 check_untyped_defs = true
 ignore_missing_imports = true
+explicit_package_bases = true
+#exclude = "(venv|\\.venv|tests)"
 
+
+[tool.autoflake]
+profile = "black"
+remove-all-unused-imports = true
+remove-unused-variables = true
+in-place = true
+
+[tool.autopep8]
+max_line_length = 100
+profile = "black"
+ignore = "E501,W6"  # or ["E501", "W6"]
+in-place = true
+recursive = true
+aggressive = 3
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "exporter/tests"
+]
+addopts = "--ignore=venv --ignore=.venv --disable-warnings --cov=exporter --cov-fail-under=70"
