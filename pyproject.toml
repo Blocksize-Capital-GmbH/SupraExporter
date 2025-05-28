@@ -1,5 +1,5 @@
 [project]
-name = "exporter"
+name = "supraexporter"
 version = "0.1.0"
 description = "Prometheus exporter for Supra blockchain RPC and Validator metrics"
 authors = [
