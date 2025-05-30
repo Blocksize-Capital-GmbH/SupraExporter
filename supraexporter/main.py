@@ -1,11 +1,4 @@
-# main.py
-from supraexporter.config import config
-from supraexporter.server import start_http_server_with_collectors
-
-
-def main():
-    start_http_server_with_collectors(config.port)
-
+from supraexporter.server import run
 
 if __name__ == "__main__":
-    main()
+    run()

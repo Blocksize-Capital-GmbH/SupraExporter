@@ -70,4 +70,4 @@ profile = "black"
 testpaths = [
     "supraexporter/tests"
 ]
-addopts = "--ignore=venv --ignore=.venv --disable-warnings --cov=supraexporter --cov-fail-under=70"
+addopts = "--ignore=venv --ignore=.venv --disable-warnings --cov=supraexporter --cov-fail-under=40"

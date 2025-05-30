@@ -1,11 +1,6 @@
-from http.server import BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from prometheus_client import (
-    CONTENT_TYPE_LATEST,
-    CollectorRegistry,
-    generate_latest,
-    start_http_server,
-)
+from prometheus_client import CONTENT_TYPE_LATEST, CollectorRegistry, generate_latest
 
 from supraexporter.collectors.common_collector import CommonCollector
 from supraexporter.collectors.rpc_collector import RpcCollector
@@ -13,11 +8,20 @@ from supraexporter.collectors.validator_collector import ValidatorCollector
 from supraexporter.config import config
 
 registry = CollectorRegistry()
+registry.register(CommonCollector())  # Register first!
+
+if config.role == "rpc":
+    registry.register(RpcCollector())
+elif config.role == "validator":
+    registry.register(ValidatorCollector())
+elif config.role == "both":
+    registry.register(RpcCollector())
+    registry.register(ValidatorCollector())
 
 
 class MetricsHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path == "/metrics":
+        if self.path == "/debug/metrics/prometheus":
             self.send_response(200)
             self.send_header("Content-Type", CONTENT_TYPE_LATEST)
             self.end_headers()
@@ -27,20 +31,13 @@ class MetricsHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
 
-def start_http_server_with_collectors(port):
-    registry.register(CommonCollector())  # Register first!
-    if config.role == "rpc":
-        registry.register(RpcCollector())
-    elif config.role == "validator":
-        registry.register(ValidatorCollector())
-    elif config.role == "both":
-        registry.register(RpcCollector())
-        registry.register(ValidatorCollector())
+def run():
+    port = 7896
+    server_address = ("", port)
+    httpd = HTTPServer(server_address, MetricsHandler)
+    print(f"Serving metrics at http://localhost:{port}/debug/metrics/prometheus")
+    httpd.serve_forever()
 
-    start_http_server(port, registry=registry)
-    print(f"Starting Prometheus exporter on port {port}...")
 
-    import time
-
-    while True:
-        time.sleep(60)
+if __name__ == "__main__":
+    run()
