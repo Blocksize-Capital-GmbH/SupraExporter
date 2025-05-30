@@ -17,4 +17,4 @@ RUN poetry install --no-root --only main
 COPY . .
 
 # Run the supraexporter
-CMD ["poetry", "run", "python", "-m", "exporter.main"]
+CMD ["poetry", "run", "python", "-m", "supraexporter.main"]
