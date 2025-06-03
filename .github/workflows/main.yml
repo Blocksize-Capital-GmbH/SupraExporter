@@ -19,25 +19,34 @@ jobs:
                   python-version: '3.12'
                   
             - name: Set up Poetry 
-              uses: abatilo/actions-poetry@v2
+              uses: abatilo/actions-poetry@v4
               with:
                 poetry-version: 1.8.4
 
+            - name: Setup a local virtual environment (if no poetry.toml file)
+              run: |
+                poetry config virtualenvs.create true --local
+                poetry config virtualenvs.in-project true --local
+
             - name: Set up cache
               uses: actions/cache@v4
-              id: cache
+              id: cache-venv
+              env:
+                cache-name: cache-venv
               with:
-                path: .venv
-                key: venv-cache-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+                path: ./.venv
+                key: venv-${{ hashFiles('poetry.lock') }}
                 restore-keys: |
                     venv-cache-${{ runner.os }}-
                     venv-cache-
 
             - name: Ensure cache is healthy
-              if: steps.cache.outputs.cache-hit == 'true'
+              if: steps.cache-venv.outputs.cache-hit == 'true'
               run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
 
-            - run: poetry install -vv --no-root
+            - name: Install deps
+              run: poetry install -vv --no-root
+              
             - name: Create dot_env
               id: 'env-supraexporter'
               run: |
