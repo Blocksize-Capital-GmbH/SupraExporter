@@ -24,7 +24,7 @@ jobs:
                 poetry-version: 1.8.4
 
             - name: Set up cache
-              uses: actions/cache@v1
+              uses: actions/cache@v4
               id: cache
               with:
                 path: .venv
@@ -32,7 +32,7 @@ jobs:
                 restore-keys: |
                     venv-cache-${{ runner.os }}-
                     venv-cache-
-                    
+
             - name: Ensure cache is healthy
               if: steps.cache.outputs.cache-hit == 'true'
               run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
