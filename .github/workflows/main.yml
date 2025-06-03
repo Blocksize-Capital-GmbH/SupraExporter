@@ -17,10 +17,10 @@ jobs:
         name: linting
         runs-on: ubuntu-latest
         steps:
-            install:
-                uses: ./.github/workflows/install.yml
-            lint:
-                uses: ./.github/workflows/lint.yml
+            - name: install
+              uses: ./.github/workflows/install.yml
+            - name: lint
+              uses: ./.github/workflows/lint.yml
 
     format:
         uses: ./.github/workflows/format.yml
