@@ -18,7 +18,9 @@ jobs:
 
             - name: Install Dependencies
               run: |
-                  pip install poetry
+                  cp .env.example .env
+
+                  pip install poetry pre-commit pydocstyle
                   poetry install -vv --no-root
 
             - name: Run Linting
