@@ -13,18 +13,30 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: Install Dependencies
-              run: |
-                  python3 -m pip install --upgrade pip
-                  pip install poetry
-
             - name: setup-python-env
               uses: actions/setup-python@v5
-              id: 'py-supraexporter'
               with:
                   python-version: '3.12'
-                  cache: 'poetry'
-              
+                  
+            - name: Set up Poetry 
+              uses: abatilo/actions-poetry@v2
+              with:
+                poetry-version: 1.8.4
+
+            - name: Set up cache
+              uses: actions/cache@v1
+              id: cache
+              with:
+                path: .venv
+                key: venv-cache-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+                restore-keys: |
+                    venv-cache-${{ runner.os }}-
+                    venv-cache-
+                    
+            - name: Ensure cache is healthy
+              if: steps.cache.outputs.cache-hit == 'true'
+              run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+
             - run: poetry install -vv --no-root
             - name: Create dot_env
               id: 'env-supraexporter'
