@@ -19,7 +19,6 @@ jobs:
             - name: Install Dependencies
               run: |
                   cp .env.example .env
-
                   pip install poetry pre-commit pydocstyle
                   poetry install -vv --no-root
 

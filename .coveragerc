@@ -1,13 +1,13 @@
 [paths]
 source =
-   exporter
+   supraexporter
 
 [run]
 branch = true
 parallel = true
 
 [html]
-directory = coverage
+directory = htmlcov
 
 [report]
 show_missing = true

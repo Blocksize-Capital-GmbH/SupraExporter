@@ -8,20 +8,8 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
-
-            - name: Setup Python
-              uses: actions/setup-python@v4
-              with:
-                  python-version: 3.12
-
-            - name: Install Dependencies
-              run: |
-                  cp .env.example .env
-
-                  pip install poetry pre-commit pydocstyle
-                  poetry install -vv --no-root
+            - name: Install deps
+              uses: ./.github/workflows/install.yml
 
             - name: Run Linting
               run: |
