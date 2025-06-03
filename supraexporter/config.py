@@ -1,3 +1,5 @@
+"""Application configuration loaded from environment variables."""
+
 import os
 
 from dotenv import load_dotenv
@@ -9,7 +11,10 @@ VALID_ROLES = {"rpc", "validator", "both"}
 
 
 class Config:
+    """Application configuration loaded from environment variables."""
+
     def __init__(self):
+        """Initialize and validate the exporter configuration."""
         self.role = os.getenv("ROLE", "both").lower()
         if self.role not in VALID_ROLES:
             raise ValueError(f"Invalid ROLE '{self.role}'. Must be one of {VALID_ROLES}.")

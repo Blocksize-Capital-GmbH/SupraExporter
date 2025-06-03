@@ -1,3 +1,5 @@
+"""Collector for validator log-based metrics."""
+
 from prometheus_client.core import GaugeMetricFamily
 from prometheus_client.registry import Collector
 
@@ -11,7 +13,10 @@ from supraexporter.utils.public_rpc import get_public_block_height
 
 
 class ValidatorCollector(Collector):
+    """Prometheus collector for validator log-based metrics."""
+
     def collect(self):
+        """Collect validator metrics from log files."""
         try:
             assert config.validator_log_path is not None  # nosec
             log_data = read_last_n_lines(config.validator_log_path)

@@ -1,3 +1,5 @@
+"""Public RPC client for fetching block height from the public RPC endpoint."""
+
 import logging
 
 import requests
@@ -8,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_public_block_height():
+    """Fetch the latest block height from the public RPC endpoint."""
     try:
         base_url = config.public_rpc_url.rstrip("/")
         url = f"{base_url}/block"

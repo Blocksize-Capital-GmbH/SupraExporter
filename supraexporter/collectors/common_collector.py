@@ -1,3 +1,5 @@
+"""Prometheus collector for public RPC block height metric."""
+
 from prometheus_client.core import GaugeMetricFamily
 from prometheus_client.registry import Collector
 
@@ -6,7 +8,10 @@ from supraexporter.utils.public_rpc import get_public_block_height
 
 
 class CommonCollector(Collector):
+    """Prometheus collector for the public RPC block height metric."""
+
     def collect(self):
+        """Collect the public RPC block height metric."""
         try:
             height = get_public_block_height()
             public_block_state.public_block_height = height

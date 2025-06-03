@@ -1,3 +1,5 @@
+"""HTTP server and metrics handler for the Supra exporter."""
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from prometheus_client import CONTENT_TYPE_LATEST, CollectorRegistry, generate_latest
@@ -20,7 +22,10 @@ elif config.role == "both":
 
 
 class MetricsHandler(BaseHTTPRequestHandler):
+    """HTTP handler for serving Prometheus metrics."""
+
     def do_GET(self):
+        """Handle GET requests to serve Prometheus metrics or return 404."""
         if self.path == "/debug/metrics/prometheus":
             self.send_response(200)
             self.send_header("Content-Type", CONTENT_TYPE_LATEST)
@@ -32,6 +37,7 @@ class MetricsHandler(BaseHTTPRequestHandler):
 
 
 def run():
+    """Start the HTTP server and serve Prometheus metrics indefinitely."""
     port = 7896
     server_address = ("", port)
     httpd = HTTPServer(server_address, MetricsHandler)

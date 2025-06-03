@@ -1,9 +1,12 @@
+"""RPC client for fetching block heights from local Supra RPC endpoint."""
+
 import requests
 
 from supraexporter.config import config
 
 
 def get_block_height():
+    """Fetch the latest block height from the local RPC endpoint."""
     try:
         # Ensure correct URL: append '/block' to the base RPC URL
         base_url = (config.rpc_url or "").rstrip("/")

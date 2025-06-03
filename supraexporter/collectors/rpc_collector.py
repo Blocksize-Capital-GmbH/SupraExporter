@@ -1,3 +1,5 @@
+"""Collector for local RPC metrics including block height and health."""
+
 from prometheus_client.core import GaugeMetricFamily
 from prometheus_client.registry import Collector
 
@@ -6,7 +8,10 @@ from supraexporter.utils.public_rpc import get_public_block_height
 
 
 class RpcCollector(Collector):
+    """Prometheus collector for local RPC block height and health metrics."""
+
     def collect(self):
+        """Collect local RPC block height and health metrics."""
         local_height = get_block_height()
         public_height = get_public_block_height()  # Fetch fresh for health only
 
