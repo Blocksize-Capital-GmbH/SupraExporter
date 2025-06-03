@@ -35,6 +35,8 @@ black = "^25.1.0"
 ruff = "^0.11.11"
 mypy = "^1.15.0"
 types-requests = "^2.32.0.20250515"
+pre-commit = "^4.2.0"
+pydocstyle = "^6.3.0"
 
 [tool.black]
 line-length = 100
