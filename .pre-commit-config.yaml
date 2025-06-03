@@ -145,13 +145,13 @@ repos:
             fail_fast: false # Allows warnings instead of failing
             stages: [manual] # Optional: Run outside the main CI pipeline
 
-#          # Check docstring formatting
-#          - id: check-docstring
-#            name: check-docstring
-#            entry: poetry run pydocstyle
-#            language: system
-#            types: [python]
-#            args: ["--convention=google"]
-#            pass_filenames: false
-#            fail_fast: false # Allows warnings instead of failing
-#            stages: [manual] # Optional: Run outside the main CI pipeline
+          # Check docstring formatting
+          - id: check-docstring
+            name: check-docstring
+            entry: poetry run pydocstyle
+            language: system
+            types: [python]
+            args: ["--convention=google"]
+            pass_filenames: false
+            fail_fast: false # Allows warnings instead of failing
+            stages: [manual] # Optional: Run outside the main CI pipeline
