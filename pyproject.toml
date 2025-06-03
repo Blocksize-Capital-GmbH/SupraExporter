@@ -9,7 +9,7 @@ authors = [
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.10"
-
+package-mode = "false"
 dependencies = [
   "prometheus-client>=0.21.0,<0.22.0",
   "python-dotenv>=1.0.0,<2.0.0",
