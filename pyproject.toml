@@ -2,12 +2,13 @@
 name = "supraexporter"
 version = "0.1.0"
 description = "Prometheus exporter for Supra blockchain RPC and Validator metrics"
+package-mode = false
 authors = [
   { name = "Abhinav Taneja", email = "at@blocksize-capital.com" },
   { name = "Axel Lode", email = "al@blocksize-capital.com" }
 ]
 license = { text = "MIT" }
-readme = "README.md"
+readme = "./README.md"
 requires-python = ">=3.10"
 
 dependencies = [
