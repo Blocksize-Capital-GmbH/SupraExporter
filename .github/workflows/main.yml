@@ -1,12 +1,6 @@
 name: CI Pipeline
 
-on:
-    push:
-        #branches:
-        #    - "main"
-    pull_request:
-        #branches:
-        #    - "main"
+on: push
 
 permissions:
     packages: write
@@ -18,9 +12,26 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - name: Install package
-              uses: ./.github/workflows/install.yml
-        
+              with:
+                  ref:
+                        - name: Install Dependencies
+              run: |
+                  python3 -m pip install --upgrade pip
+                  pip install poetry
+
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: '3.12'
+                  cache: 'poetry'
+                  id: 'py-supraexporter'
+
+            - run: poetry install -vv
+            - name: Create dot_env
+              id: 'env-supraexporter'
+              run: |
+                cp .env.example .env
+                echo "envdir=$(realpath ".env")"  >> "$GITHUB_OUTPUT"
+                
     lint:
         runs-on: ubuntu-latest
         needs: install
