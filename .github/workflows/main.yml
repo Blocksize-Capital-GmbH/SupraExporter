@@ -18,13 +18,14 @@ jobs:
                   python3 -m pip install --upgrade pip
                   pip install poetry
 
-            - uses: actions/setup-python@v5
+            - name: setup-python-env
+              uses: actions/setup-python@v5
+              id: 'py-supraexporter'
               with:
                   python-version: '3.12'
                   cache: 'poetry'
-                  id: 'py-supraexporter'
-
-            - run: poetry install -vv
+              
+            - run: poetry install -vv --no-root
             - name: Create dot_env
               id: 'env-supraexporter'
               run: |
