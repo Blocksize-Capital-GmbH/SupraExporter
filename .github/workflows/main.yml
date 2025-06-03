@@ -11,10 +11,15 @@ on:
 permissions:
     packages: write
     contents: read
+    actions: read
 
-jobs:
+job:
     install:
-        uses: ./.github/workflows/install.yml
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Install package
+              uses: ./.github/workflows/install.yml
         
     lint:
         runs-on: ubuntu-latest
