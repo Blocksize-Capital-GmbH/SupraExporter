@@ -14,7 +14,12 @@ permissions:
 
 jobs:
     lint:
-        uses: ./.github/workflows/lint.yml
+        steps:
+            - name: install
+              uses: ./.github/workflows/install.yml
+              
+            - name: Lint
+              uses: ./.github/workflows/lint.yml
 
     format:
         uses: ./.github/workflows/format.yml
