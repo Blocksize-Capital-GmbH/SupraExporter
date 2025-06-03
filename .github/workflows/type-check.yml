@@ -25,4 +25,4 @@ jobs:
 
             - name: Run Type Checks
               run: |
-                  poetry run mypy --ignore-missing-imports solanaexporter/
+                  poetry run mypy --ignore-missing-imports supraexporter/
