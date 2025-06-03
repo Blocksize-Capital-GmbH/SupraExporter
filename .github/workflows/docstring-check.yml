@@ -20,7 +20,7 @@ jobs:
             - name: Install Dependencies
               run: |
                   pip install poetry
-                  poetry install -vv
+                  poetry install -vv --no-root
 
             - name: Run Docstring Checks
               run: |
