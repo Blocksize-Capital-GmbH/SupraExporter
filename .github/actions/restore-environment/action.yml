@@ -41,12 +41,15 @@ runs:
             exit 1
         fi
 
-        # Install Poetry
-        echo "Installing Poetry..."
-        python -m pip install --upgrade pip
-        if ! pip install poetry; then
-            echo "Error: Failed to install Poetry"
-            exit 1
+        # Install Poetry only if not already available
+        echo "Checking Poetry installation..."
+        if ! command -v poetry >/dev/null 2>&1; then
+            echo "Poetry not found, installing..."
+            python -m pip install --upgrade pip
+            pip install poetry
+            echo "✅ Poetry installed"
+        else
+            echo "✅ Poetry already available: $(poetry --version)"
         fi
 
         # Restore executable permissions for virtual environment
@@ -76,6 +79,19 @@ runs:
         echo "Configuring Poetry to use restored virtual environment..."
         poetry config virtualenvs.create false
         poetry config virtualenvs.path "$ARTIFACTS_PATH/venv"
+
+        # Ensure .env file is available in project directory
+        echo "Ensuring .env configuration is available..."
+        if [ -f "$ARTIFACTS_PATH/source/.env" ]; then
+            echo "✅ .env file found in project"
+        elif [ -f "$ARTIFACTS_PATH/source/.env.example" ]; then
+            echo "Creating .env from .env.example..."
+            cp "$ARTIFACTS_PATH/source/.env.example" \
+               "$ARTIFACTS_PATH/source/.env"
+            echo "✅ .env file created from example"
+        else
+            echo "Warning: Neither .env nor .env.example found"
+        fi
 
         # Verify the virtual environment works
         echo "Verifying virtual environment..."
