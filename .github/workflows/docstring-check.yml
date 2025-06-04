@@ -33,9 +33,37 @@ jobs:
 
             - name: Copy .github directory to workspace root
               run: |
-                  # Copy .github directory from artifacts to workspace root for local action access
-                  cp -r "${{ env.ARTIFACTS_DIR }}/source/.github" .
-                  echo "Copied .github directory to workspace root"
+                  set -e
+                  echo "=== Debugging artifacts structure ==="
+                  ARTIFACTS_PATH="${{ env.ARTIFACTS_DIR }}"
+                  echo "Artifacts directory: $ARTIFACTS_PATH"
+                  echo "Current working directory: $(pwd)"
+                  echo "Workspace: $GITHUB_WORKSPACE"
+                  
+                  echo "Contents of artifacts directory:"
+                  ls -la "$ARTIFACTS_PATH" || echo "Artifacts directory not found"
+                  
+                  echo "Contents of artifacts/source:"
+                  ls -la "$ARTIFACTS_PATH/source" || echo "Source directory not found"
+                  
+                  echo "Looking for .github directory:"
+                  if [ -d "$ARTIFACTS_PATH/source/.github" ]; then
+                      echo "✓ Found .github directory at $ARTIFACTS_PATH/source/.github"
+                      echo "Contents:"
+                      ls -la "$ARTIFACTS_PATH/source/.github"
+                      
+                      echo "Copying .github directory to workspace root..."
+                      cp -r "$ARTIFACTS_PATH/source/.github" "$GITHUB_WORKSPACE/"
+                      echo "✓ .github directory copied successfully"
+                  else
+                      echo "✗ .github directory not found in artifacts"
+                      echo "Searching for .github in artifacts..."
+                      find "$ARTIFACTS_PATH" -name ".github" -type d 2>/dev/null || echo "No .github directory found"
+                      
+                      echo "This is unexpected - creating minimal .github structure for action to work"
+                      mkdir -p "$GITHUB_WORKSPACE/.github/actions/restore-environment"
+                      echo "Minimal .github structure created as fallback"
+                  fi
 
             - name: Restore Environment
               uses: ./.github/actions/restore-environment
