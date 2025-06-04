@@ -30,6 +30,12 @@ jobs:
                   name: supraexporter-artifacts-${{ github.run_id }}
                   path: ${{ env.ARTIFACTS_DIR }}
 
+            - name: Copy .github directory to workspace root
+              run: |
+                  # Copy .github directory from artifacts to workspace root for local action access
+                  cp -r "${{ env.ARTIFACTS_DIR }}/source/.github" .
+                  echo "Copied .github directory to workspace root"
+
             - name: Restore Environment
               uses: ./.github/actions/restore-environment
               with:
