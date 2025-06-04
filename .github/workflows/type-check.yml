@@ -25,6 +25,9 @@ jobs:
         runs-on: ubuntu-22.04
         continue-on-error: true
         steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
             - name: Restore Environment
               uses: ./.github/actions/restore-environment
               with:

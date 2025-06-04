@@ -13,7 +13,7 @@ name: Check Documentation Strings
                 description: 'Directory for storing all artifacts'
                 required: false
                 type: string
-                default: '/home/runner/work/artifacts'
+                default: 'artifacts'
 
 env:
     PYTHON_VERSION: ${{ inputs.python-version }}
@@ -25,6 +25,9 @@ jobs:
         runs-on: ubuntu-22.04
         continue-on-error: true
         steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
             - name: Restore Environment
               uses: ./.github/actions/restore-environment
               with:
