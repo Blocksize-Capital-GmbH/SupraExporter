@@ -37,14 +37,16 @@ jobs:
 #                poetry config virtualenvs.in-project true --local
 
             - name: Set up cache
-              uses: actions/cache@v3
-              id: cache-venv
+              id: cache-python-env
+              uses: actions/cache@v4
+              env: 
+                cache-name: cache-venv
               with:
                 path: ~/poetry-venv
-                key: venv-cache-${{ hashFiles('poetry.lock') }}
+                key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('poetry.lock') }}
 
             - name: Ensure cache is healthy
-              if: steps.cache-venv.outputs.cache-hit == 'true'
+              if: steps.cache-python-env.outputs.cache-hit == 'true'
               run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
 
             - name: Install deps
