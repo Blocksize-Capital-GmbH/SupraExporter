@@ -61,17 +61,29 @@ jobs:
                   python -m pip install --upgrade pip
                   pip install poetry
 
-            - name: Configure Poetry with artifacts paths
+            - name: Configure Poetry with custom directories
               run: |
+                  set -e
                   echo "Configuring Poetry with unified artifacts structure..."
+                  
+                  # Define directories
                   ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
+                  POETRY_VENV_PATH="$ARTIFACTS_PATH/venv"
+                  POETRY_CACHE_DIR="$ARTIFACTS_PATH/poetry-cache"
+                  POETRY_DATA_DIR="$ARTIFACTS_PATH/poetry-data"
+                  
+                  # Verify Poetry installation
+                  echo "Poetry version: $(poetry --version)"
                   
                   # Configure Poetry to use artifacts directories
                   poetry config virtualenvs.create true
                   poetry config virtualenvs.in-project false
-                  poetry config virtualenvs.path "$ARTIFACTS_PATH/venv"
-                  poetry config cache-dir "$ARTIFACTS_PATH/poetry-cache"
-                  poetry config data-dir "$ARTIFACTS_PATH/poetry-data"
+                  poetry config virtualenvs.path "$POETRY_VENV_PATH"
+                  poetry config cache-dir "$POETRY_CACHE_DIR"
+                  
+                  # Set environment variable for data-dir (workaround for Poetry version compatibility)
+                  # Note: data-dir config option not available in all Poetry versions
+                  echo "POETRY_DATA_DIR=$POETRY_DATA_DIR" >> $GITHUB_ENV
                   
                   # Display configuration
                   echo "Poetry configuration:"
