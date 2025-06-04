@@ -1,0 +1,124 @@
+---
+name: 'Restore Environment'
+description: 'Download and restore the unified artifacts environment'
+
+inputs:
+    python-version:
+        description: 'Python version to use'
+        required: false
+        default: '3.12'
+    artifacts-dir:
+        description: 'Directory for storing all artifacts'
+        required: false
+        default: '/home/runner/work/artifacts'
+
+runs:
+    using: 'composite'
+    steps:
+        - name: Setup Python environment
+          uses: actions/setup-python@v4
+          with:
+              python-version: ${{ inputs.python-version }}
+
+        - name: Download unified artifacts
+          uses: actions/download-artifact@v4
+          with:
+              name: supraexporter-artifacts-${{ github.run_id }}
+              path: ${{ inputs.artifacts-dir }}
+
+        - name: Restore environment configuration
+          shell: bash
+          run: |
+              echo "=== Restoring Environment Configuration ==="
+
+              # Verify artifacts structure
+              echo "Downloaded artifacts structure:"
+              ls -la "${{ inputs.artifacts-dir }}"
+
+              # Check for required components
+              components="poetry-cache poetry-data venv source python-env.sh"
+              for component in $components; do
+                  if [ -e "${{ inputs.artifacts-dir }}/$component" ]; then
+                      echo "✓ Found: $component"
+                  else
+                      echo "✗ Missing: $component"
+                      exit 1
+                  fi
+              done
+
+              # Source environment configuration
+              env_file="${{ inputs.artifacts-dir }}/python-env.sh"
+              if [ -f "$env_file" ]; then
+                  echo "Sourcing environment configuration..."
+                  source "$env_file"
+
+                  # Export for subsequent steps in the job
+                  artifacts_dir="${{ inputs.artifacts-dir }}"
+                  echo "ARTIFACTS_DIR=$artifacts_dir" >> $GITHUB_ENV
+                  echo "PROJECT_DIR=$artifacts_dir/source" >> $GITHUB_ENV
+                  echo "POETRY_CACHE_DIR=$artifacts_dir/poetry-cache" >> $GITHUB_ENV
+                  echo "POETRY_DATA_DIR=$artifacts_dir/poetry-data" >> $GITHUB_ENV
+                  echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
+                  echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH
+
+                  echo "Environment variables exported successfully"
+              else
+                  echo "✗ Environment configuration file not found"
+                  exit 1
+              fi
+
+        - name: Restore executable permissions
+          shell: bash
+          run: |
+              echo "Restoring executable permissions..."
+
+              # Find and restore executable permissions for Python executables
+              venv_dir="${{ inputs.artifacts-dir }}/venv"
+              find "$venv_dir" -name "python*" -type f -exec chmod +x {} \; || true
+              find "$venv_dir" -path "*/bin/*" -type f -exec chmod +x {} \; || true
+
+              # Ensure the environment script is executable
+              chmod +x "${{ inputs.artifacts-dir }}/python-env.sh"
+
+              echo "Permissions restored successfully"
+
+        - name: Configure Poetry and verify environment
+          shell: bash
+          run: |
+              echo "=== Configuring Poetry and Verifying Environment ==="
+
+              # Source environment
+              source "${{ inputs.artifacts-dir }}/python-env.sh"
+
+              echo "Python version: $(python --version)"
+              echo "Virtual environment: $VIRTUAL_ENV"
+              echo "Project directory: $PROJECT_DIR"
+
+              # Verify virtual environment is functional
+              if [ -f "$VIRTUAL_ENV/bin/python" ]; then
+                  venv_python_version="$($VIRTUAL_ENV/bin/python --version)"
+                  echo "✓ Virtual environment Python: $venv_python_version"
+              else
+                  echo "✗ Virtual environment Python not found"
+                  exit 1
+              fi
+
+              # Change to project directory and install Poetry
+              cd "$PROJECT_DIR"
+
+              # Install Poetry in the current environment (lightweight operation)
+              python -m pip install --upgrade pip
+              pip install poetry
+
+              # Configure Poetry to use restored directories
+              artifacts_dir="${{ inputs.artifacts-dir }}"
+              poetry config virtualenvs.create true
+              poetry config virtualenvs.in-project false
+              poetry config virtualenvs.path "$artifacts_dir/venv"
+              poetry config cache-dir "$artifacts_dir/poetry-cache"
+              poetry config data-dir "$artifacts_dir/poetry-data"
+
+              echo "✓ Poetry configured successfully"
+              poetry env info
+
+              echo "Environment ready for execution" 

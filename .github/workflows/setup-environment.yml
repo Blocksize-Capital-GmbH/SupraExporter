@@ -1,0 +1,180 @@
+---
+name: Setup Environment
+
+on:
+    workflow_call:
+        inputs:
+            python-version:
+                description: 'Python version to use'
+                required: false
+                type: string
+                default: '3.12'
+            artifacts-dir:
+                description: 'Directory for storing all artifacts'
+                required: false
+                type: string
+                default: '/home/runner/work/artifacts'
+        outputs:
+            artifacts-path:
+                description: 'Path to the artifacts directory'
+                value: ${{ jobs.setup.outputs.artifacts-path }}
+
+env:
+    PYTHON_VERSION: ${{ inputs.python-version }}
+    ARTIFACTS_DIR: ${{ inputs.artifacts-dir }}
+
+jobs:
+    setup:
+        name: Setup Environment and Create Artifacts
+        runs-on: ubuntu-22.04
+        outputs:
+            artifacts-path: ${{ env.ARTIFACTS_DIR }}
+        steps:
+            - name: Create artifacts directory structure
+              run: |
+                  echo "Creating unified artifacts directory structure..."
+                  mkdir -p "${{ env.ARTIFACTS_DIR }}/poetry-cache"
+                  mkdir -p "${{ env.ARTIFACTS_DIR }}/poetry-data"
+                  mkdir -p "${{ env.ARTIFACTS_DIR }}/venv"
+                  mkdir -p "${{ env.ARTIFACTS_DIR }}/source"
+                  
+                  echo "Artifacts directory structure created:"
+                  ls -la "${{ env.ARTIFACTS_DIR }}"
+
+            - name: Setup Python environment
+              id: setup-python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
+
+            - name: Checkout repository to artifacts/source
+              uses: actions/checkout@v4
+              with:
+                  path: ${{ env.ARTIFACTS_DIR }}/source
+
+            - name: Install Poetry
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install poetry
+
+            - name: Configure Poetry with artifacts paths
+              run: |
+                  echo "Configuring Poetry with unified artifacts structure..."
+                  
+                  # Configure Poetry to use artifacts directories
+                  poetry config virtualenvs.create true
+                  poetry config virtualenvs.in-project false
+                  poetry config virtualenvs.path "${{ env.ARTIFACTS_DIR }}/venv"
+                  poetry config cache-dir "${{ env.ARTIFACTS_DIR }}/poetry-cache"
+                  poetry config data-dir "${{ env.ARTIFACTS_DIR }}/poetry-data"
+                  
+                  # Display configuration
+                  echo "Poetry configuration:"
+                  poetry config --list
+
+            - name: Cache Poetry directories
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ${{ env.ARTIFACTS_DIR }}/poetry-cache
+                      ${{ env.ARTIFACTS_DIR }}/poetry-data
+                  key: >-
+                      poetry-dirs-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+                  restore-keys: |
+                      poetry-dirs-${{ runner.os }}-
+
+            - name: Install project dependencies
+              working-directory: ${{ env.ARTIFACTS_DIR }}/source
+              run: |
+                  echo "Installing project dependencies..."
+                  cp .env.example .env
+                  poetry install -vv --no-root
+                  
+                  echo "Verifying installation..."
+                  poetry env info
+
+            - name: Verify and prepare virtual environment
+              run: |
+                  echo "=== Environment Information ==="
+                  echo "Python location: ${{ steps.setup-python.outputs.python-path }}"
+                  echo "Python version: $(python --version)"
+                  echo "Poetry version: $(poetry --version)"
+                  echo "Artifacts directory: ${{ env.ARTIFACTS_DIR }}"
+                  
+                  echo "=== Poetry Environment Info ==="
+                  cd "${{ env.ARTIFACTS_DIR }}/source"
+                  poetry env info
+                  
+                  echo "=== Virtual Environment Verification ==="
+                  VENV_NAME=$(cd "${{ env.ARTIFACTS_DIR }}/source" && poetry env info --path | xargs basename)
+                  VENV_FULL_PATH="${{ env.ARTIFACTS_DIR }}/venv/$VENV_NAME"
+                  
+                  echo "Expected venv path: $VENV_FULL_PATH"
+                  
+                  if [ -d "$VENV_FULL_PATH" ]; then
+                      echo "✓ Virtual environment found at: $VENV_FULL_PATH"
+                      echo "Size: $(du -sh "$VENV_FULL_PATH")"
+                      echo "VENV_FULL_PATH=$VENV_FULL_PATH" >> $GITHUB_ENV
+                  else
+                      echo "✗ Virtual environment not found at expected path"
+                      echo "Searching for created virtual environments..."
+                      find "${{ env.ARTIFACTS_DIR }}/venv" -name "pyvenv.cfg" -type f 2>/dev/null || true
+                      exit 1
+                  fi
+
+            - name: Create comprehensive environment configuration
+              run: |
+                  echo "Creating environment configuration script..."
+                  cat > "${{ env.ARTIFACTS_DIR }}/python-env.sh" << 'EOF'
+                  #!/bin/bash
+                  # Environment configuration for SupraExporter CI
+                  
+                  # Python environment
+                  export PYTHON_VERSION="${{ env.PYTHON_VERSION }}"
+                  export pythonLocation="${{ steps.setup-python.outputs.python-path }}"
+                  export PKG_CONFIG_PATH="${{ steps.setup-python.outputs.python-path }}/lib/pkgconfig"
+                  export Python_ROOT_DIR="${{ steps.setup-python.outputs.python-path }}"
+                  export Python2_ROOT_DIR="${{ steps.setup-python.outputs.python-path }}"
+                  export Python3_ROOT_DIR="${{ steps.setup-python.outputs.python-path }}"
+                  export LD_LIBRARY_PATH="${{ steps.setup-python.outputs.python-path }}/lib"
+                  
+                  # Artifacts directories
+                  export ARTIFACTS_DIR="${{ env.ARTIFACTS_DIR }}"
+                  export POETRY_CACHE_DIR="${{ env.ARTIFACTS_DIR }}/poetry-cache"
+                  export POETRY_DATA_DIR="${{ env.ARTIFACTS_DIR }}/poetry-data"
+                  
+                  # Virtual environment
+                  export VIRTUAL_ENV="${{ env.VENV_FULL_PATH }}"
+                  export PATH="${{ env.VENV_FULL_PATH }}/bin:$PATH"
+                  
+                  # Working directory
+                  export PROJECT_DIR="${{ env.ARTIFACTS_DIR }}/source"
+                  
+                  echo "Environment configured successfully"
+                  echo "Virtual environment: $VIRTUAL_ENV"
+                  echo "Project directory: $PROJECT_DIR"
+                  EOF
+                  
+                  chmod +x "${{ env.ARTIFACTS_DIR }}/python-env.sh"
+                  
+                  echo "Environment configuration created:"
+                  cat "${{ env.ARTIFACTS_DIR }}/python-env.sh"
+
+            - name: Verify artifacts structure
+              run: |
+                  echo "=== Final Artifacts Structure ==="
+                  find "${{ env.ARTIFACTS_DIR }}" -type f -name "python-env.sh" -o -name "pyvenv.cfg" -o -name "poetry.lock" | head -10
+                  
+                  echo "=== Artifacts Directory Size ==="
+                  du -sh "${{ env.ARTIFACTS_DIR }}"
+                  
+                  echo "=== Artifacts Subdirectory Sizes ==="
+                  du -sh "${{ env.ARTIFACTS_DIR }}"/*
+
+            - name: Upload unified artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: supraexporter-artifacts-${{ github.run_id }}
+                  path: ${{ env.ARTIFACTS_DIR }}
+                  retention-days: 1
+                  if-no-files-found: error 

@@ -1,0 +1,40 @@
+---
+name: Run All Pre-commit Hooks
+
+"on":
+    workflow_call:
+        inputs:
+            python-version:
+                description: 'Python version to use'
+                required: false
+                type: string
+                default: '3.12'
+            artifacts-dir:
+                description: 'Directory for storing all artifacts'
+                required: false
+                type: string
+                default: '/home/runner/work/artifacts'
+
+env:
+    PYTHON_VERSION: ${{ inputs.python-version }}
+    ARTIFACTS_DIR: ${{ inputs.artifacts-dir }}
+
+jobs:
+    pre-commit-all:
+        name: Run All Pre-commit Hooks
+        runs-on: ubuntu-22.04
+        steps:
+            - name: Restore Environment
+              uses: ./.github/actions/restore-environment
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
+                  artifacts-dir: ${{ env.ARTIFACTS_DIR }}
+
+            - name: Run all pre-commit hooks (reproducing local commit flow)
+              run: |
+                  source "${{ env.ARTIFACTS_DIR }}/python-env.sh"
+                  cd "$PROJECT_DIR"
+                  
+                  # This reproduces the exact local commit flow
+                  echo "Running all pre-commit hooks as in local development..."
+                  poetry run pre-commit run --all-files 
