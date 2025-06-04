@@ -24,8 +24,11 @@ jobs:
         name: Run All Pre-commit Hooks
         runs-on: ubuntu-22.04
         steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
+            - name: Download unified artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: supraexporter-artifacts-${{ github.run_id }}
+                  path: ${{ env.ARTIFACTS_DIR }}
 
             - name: Restore Environment
               uses: ./.github/actions/restore-environment

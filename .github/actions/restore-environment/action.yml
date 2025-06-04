@@ -1,6 +1,6 @@
 ---
 name: 'Restore Environment'
-description: 'Download and restore the unified artifacts environment'
+description: 'Restore unified artifacts environment from downloaded artifacts'
 
 inputs:
     python-version:
@@ -19,12 +19,6 @@ runs:
           uses: actions/setup-python@v4
           with:
               python-version: ${{ inputs.python-version }}
-
-        - name: Download unified artifacts
-          uses: actions/download-artifact@v4
-          with:
-              name: supraexporter-artifacts-${{ github.run_id }}
-              path: ${{ inputs.artifacts-dir }}
 
         - name: Restore environment configuration
           shell: bash
@@ -113,7 +107,7 @@ runs:
               # Change to project directory and install Poetry
               cd "$PROJECT_DIR"
 
-              # Install Poetry in the current environment (lightweight operation)
+              # Install Poetry in the current environment (lightweight)
               python -m pip install --upgrade pip
               pip install poetry
 
@@ -131,7 +125,7 @@ runs:
               poetry config virtualenvs.path "$POETRY_VENV_PATH"
               poetry config cache-dir "$POETRY_CACHE_DIR"
 
-              # Set environment variable for data-dir (workaround for Poetry version compatibility)
+              # Set environment variable for data-dir compatibility
               export POETRY_DATA_DIR="$POETRY_DATA_DIR"
 
               echo "✓ Poetry configured successfully"
