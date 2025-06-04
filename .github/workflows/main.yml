@@ -53,14 +53,20 @@ jobs:
                   cp .env.example .env
                   poetry install -vv --no-root
                   
-            - name: Verify virtual environment location
+            - name: Verify virtual environment and prepare for upload
               run: |
+                  echo "Current working directory: $(pwd)"
                   echo "Checking for .venv directory..."
                   if [ -d ".venv" ]; then
                       echo "✓ .venv directory found"
                       ls -la .venv/
                       echo "Virtual environment size:"
                       du -sh .venv/
+                      echo "Absolute path to .venv: $(realpath .venv)"
+                      echo "Directory permissions:"
+                      ls -ld .venv
+                      echo "Contents accessible test:"
+                      ls .venv/bin/ | head -5
                   else
                       echo "✗ .venv directory not found"
                       echo "Poetry environment info:"
@@ -70,13 +76,21 @@ jobs:
                       find /home/runner -name "*venv*" -type d 2>/dev/null || true
                       exit 1
                   fi
+                  
+                  # Pre-upload verification
+                  echo "Final verification before upload:"
+                  ls -la .venv/
+                  echo "Working directory contents:"
+                  ls -la .
 
             - name: Upload virtual environment artifact
               uses: actions/upload-artifact@v4
               with:
                   name: poetry-venv-${{ github.run_id }}
-                  path: .venv
+                  path: |
+                      .venv/
                   retention-days: 1
+                  if-no-files-found: error
 
     tests:
         name: Run Tests
