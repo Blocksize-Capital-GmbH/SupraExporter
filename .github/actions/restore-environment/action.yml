@@ -94,23 +94,9 @@ runs:
                "$ARTIFACTS_PATH/source/.env"
             echo "✅ .env file created from example"
         else
-            echo "⚠️  Neither .env nor .env.example found in project directory"
-            echo "Checking if .env.example exists in workspace root..."
-
-            # Fallback: check if we can find .env.example in the workspace
-            if [ -f ".env.example" ]; then
-                echo "Found .env.example in workspace root, copying..."
-                cp ".env.example" "$ARTIFACTS_PATH/source/.env"
-                echo "✅ .env file created from workspace .env.example"
-            else
-                echo "❌ No .env.example found anywhere"
-                echo "Creating minimal .env for testing..."
-                echo "# Minimal configuration for CI testing" > \
-                    "$ARTIFACTS_PATH/source/.env"
-                echo "RPC_URL=http://localhost:8545" >> \
-                    "$ARTIFACTS_PATH/source/.env"
-                echo "✅ Minimal .env file created"
-            fi
+            echo "❌ Neither .env nor .env.example found in artifacts"
+            echo "This should not happen with include-hidden-files: true"
+            exit 1
         fi
 
         # Verify .env file exists and show its contents
@@ -120,7 +106,8 @@ runs:
             echo "Contents preview:"
             head -5 "$ARTIFACTS_PATH/source/.env" | sed 's/^/  /'
         else
-            echo "❌ .env file still not available after all attempts"
+            echo "❌ .env file still not available"
+            exit 1
         fi
 
         # Verify the virtual environment works

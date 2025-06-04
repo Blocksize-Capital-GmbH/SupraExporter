@@ -224,4 +224,5 @@ jobs:
                   name: supraexporter-artifacts-${{ github.run_id }}
                   path: ${{ env.ARTIFACTS_DIR }}
                   retention-days: 1
-                  if-no-files-found: error 
+                  if-no-files-found: error
+                  include-hidden-files: true 

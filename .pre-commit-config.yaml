@@ -13,10 +13,10 @@ repos:
 
     # Ensure Poetry configurations are valid
     - repo: https://github.com/python-poetry/poetry
-      rev: 1.8.0
+      rev: v2.1.3
       hooks:
           - id: poetry-check
-            additional_dependencies: [poetry==1.8.2]
+            additional_dependencies: [poetry==2.1.3]
             stages: [commit-msg]
 
     # Auto-format Python code with autopep8
