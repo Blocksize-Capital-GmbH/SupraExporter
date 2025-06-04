@@ -56,6 +56,33 @@ jobs:
               with:
                   path: ${{ env.ARTIFACTS_DIR }}/source
 
+            - name: Copy .github directory to non-hidden location
+              run: |
+                  echo "Copying .github directory to ensure it's included in artifacts..."
+                  ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
+                  
+                  # Verify .github directory exists in source
+                  if [ -d "$ARTIFACTS_PATH/source/.github" ]; then
+                      echo "✓ Found .github directory in source"
+                      
+                      # Copy to non-hidden location
+                      cp -r "$ARTIFACTS_PATH/source/.github" "$ARTIFACTS_PATH/github-actions"
+                      echo "✓ Copied .github to github-actions (non-hidden)"
+                      
+                      # Verify the copy worked
+                      echo "Contents of github-actions directory:"
+                      ls -la "$ARTIFACTS_PATH/github-actions/"
+                      
+                      if [ -f "$ARTIFACTS_PATH/github-actions/actions/restore-environment/action.yml" ]; then
+                          echo "✓ Composite action found in copied directory"
+                      else
+                          echo "✗ Composite action not found in copied directory"
+                      fi
+                  else
+                      echo "✗ .github directory not found in source checkout"
+                      exit 1
+                  fi
+
             - name: Install Poetry
               run: |
                   python -m pip install --upgrade pip
