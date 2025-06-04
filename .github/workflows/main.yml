@@ -20,21 +20,20 @@ jobs:
 
             - name: create venv
               run: | 
-                python3.12 -m pip install --upgrade pip
-                python3.12 -m venv ~/poetry-venv
+                python -m pip install --upgrade pip
+                python -m venv ~/poetry-venv
                 source ~/poetry-venv/bin/activate
                 pip install poetry               
                 poetry install -vv --no-root
+                cp .env.example ~/poetry-venv/.env
+                echo "envdir=$(realpath "~/poetry-venv/.env")"  >> "$GITHUB_OUTPUT"
 
-#            - name: Set up Poetry 
-#              uses: abatilo/actions-poetry@v4
-#              with:
-#                poetry-version: 1.8.4
+            - name: verbose env dir
+              run: |
+                  source ~/poetry-venv/bin/activate
+                  echo $(ls -ltrh)
+                  python --version
 
-#            - name: Setup a local virtual environment (if no poetry.toml file)
-#              run: |
-#                poetry config virtualenvs.create true --local
-#                poetry config virtualenvs.in-project true --local
 
             - name: Set up cache
               id: cache-python-env
@@ -43,19 +42,13 @@ jobs:
                 cache-name: cache-venv
               with:
                 path: ~/poetry-venv
-                key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('poetry.lock') }}
+                key: ${{ env.cache-name }}-${{ hashFiles('poetry.lock') }}
 
-            - name: Ensure cache is healthy
-              if: steps.cache-python-env.outputs.cache-hit == 'true'
-              run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
-
-            - name: Install deps
-              run: poetry install -vv --no-root
 
             - name: Create dot_env
               id: 'env-supraexporter'
               run: |
-                cp .env.example .env
+                cp .env.example ~/poetry-venv/.env
                 echo "envdir=$(realpath ".env")"  >> "$GITHUB_OUTPUT"
 
     lint:
