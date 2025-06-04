@@ -1,33 +1,47 @@
-name: Tests
+---
+name: Run Tests
 
-on:
+"on":
     workflow_call:
+        inputs:
+            python-version:
+                description: 'Python version to use'
+                required: false
+                type: string
+                default: '3.12'
+            artifacts-dir:
+                description: 'Directory for storing all artifacts'
+                required: false
+                type: string
+                default: '/home/runner/work/artifacts'
+
+env:
+    PYTHON_VERSION: ${{ inputs.python-version }}
+    ARTIFACTS_DIR: ${{ inputs.artifacts-dir }}
 
 jobs:
     tests:
-        runs-on: ubuntu-latest
-
+        name: Run Tests
+        runs-on: ubuntu-22.04
         steps:
-            - name: Checkout Code
-              uses: actions/checkout@v4
-
-            - name: Setup Python
-              uses: actions/setup-python@v4
+            - name: Restore Environment
+              uses: ./.github/actions/restore-environment
               with:
-                  python-version: 3.12
+                  python-version: ${{ env.PYTHON_VERSION }}
+                  artifacts-dir: ${{ env.ARTIFACTS_DIR }}
 
-            - name: Install Dependencies
+            - name: Run test suite with coverage
               run: |
-                  cp .env.example .env
-                  pip install poetry pre-commit pydocstyle
-                  poetry install -vv --no-root
+                  source "${{ env.ARTIFACTS_DIR }}/python-env.sh"
+                  cd "$PROJECT_DIR"
+                  
+                  # Execute tests via poetry (reproducing local workflow)
+                  poetry run pytest supraexporter/tests/ -v \
+                      --cov=supraexporter --cov-report=html --cov-report=term-missing
 
-            - name: Run Tests
-              run: |
-                  poetry run pytest --cov=supraexporter --cov-report=term --cov-report=html --disable-warnings --cov-fail-under=70
-
-            - name: Upload Coverage Report
+            - name: Upload coverage reports
               uses: actions/upload-artifact@v4
               with:
-                  name: coverage-report
-                  path: htmlcov/
+                  name: coverage-report-${{ github.run_id }}
+                  path: ${{ env.ARTIFACTS_DIR }}/source/htmlcov/
+                  retention-days: 7

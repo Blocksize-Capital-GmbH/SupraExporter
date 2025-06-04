@@ -1,29 +1,40 @@
-name: Format
+---
+name: Check Code Formatting
 
-on:
+"on":
     workflow_call:
+        inputs:
+            python-version:
+                description: 'Python version to use'
+                required: false
+                type: string
+                default: '3.12'
+            artifacts-dir:
+                description: 'Directory for storing all artifacts'
+                required: false
+                type: string
+                default: '/home/runner/work/artifacts'
+
+env:
+    PYTHON_VERSION: ${{ inputs.python-version }}
+    ARTIFACTS_DIR: ${{ inputs.artifacts-dir }}
 
 jobs:
     format:
-        runs-on: ubuntu-latest
-
+        name: Check Code Formatting
+        runs-on: ubuntu-22.04
         steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
-
-            - name: Setup Python
-              uses: actions/setup-python@v4
+            - name: Restore Environment
+              uses: ./.github/actions/restore-environment
               with:
-                  python-version: 3.12
+                  python-version: ${{ env.PYTHON_VERSION }}
+                  artifacts-dir: ${{ env.ARTIFACTS_DIR }}
 
-            - name: Install Dependencies
+            - name: Run formatting checks via pre-commit
               run: |
-                  cp .env.example .env
-
-                  pip install poetry pre-commit pydocstyle
-                  poetry install -vv --no-root
-
-            - name: Run Formatting
-              run: |
+                  source "${{ env.ARTIFACTS_DIR }}/python-env.sh"
+                  cd "$PROJECT_DIR"
+                  
+                  # Execute formatting checks via pre-commit (reproducing local workflow)
                   poetry run pre-commit run black --all-files
                   poetry run pre-commit run isort --all-files

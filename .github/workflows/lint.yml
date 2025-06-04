@@ -1,23 +1,40 @@
-name: Lint
+---
+name: Run Code Linting
 
-on:
+"on":
     workflow_call:
+        inputs:
+            python-version:
+                description: 'Python version to use'
+                required: false
+                type: string
+                default: '3.12'
+            artifacts-dir:
+                description: 'Directory for storing all artifacts'
+                required: false
+                type: string
+                default: '/home/runner/work/artifacts'
+
+env:
+    PYTHON_VERSION: ${{ inputs.python-version }}
+    ARTIFACTS_DIR: ${{ inputs.artifacts-dir }}
 
 jobs:
-    Lint:
-        name: Lint
-        runs-on: ubuntu-latest
-
+    lint:
+        name: Run Code Linting
+        runs-on: ubuntu-22.04
         steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
+            - name: Restore Environment
+              uses: ./.github/actions/restore-environment
+              with:
+                  python-version: ${{ env.PYTHON_VERSION }}
+                  artifacts-dir: ${{ env.ARTIFACTS_DIR }}
 
-            - name: install
-              uses: ./.github/workflows/install.yml
-
-            - name: Run Linting
+            - name: Run linting checks via pre-commit
               run: |
-                  poetry run pre-commit run black --all-files
-                  poetry run pre-commit run isort --all-files
+                  source "${{ env.ARTIFACTS_DIR }}/python-env.sh"
+                  cd "$PROJECT_DIR"
+                  
+                  # Execute linting checks via pre-commit (reproducing local workflow)
                   poetry run pre-commit run flake8 --all-files
                   poetry run pre-commit run codespell --all-files
