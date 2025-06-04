@@ -13,7 +13,7 @@ name: Run Tests
                 description: 'Directory for storing all artifacts'
                 required: false
                 type: string
-                default: '/home/runner/work/artifacts'
+                default: 'artifacts'
 
 env:
     PYTHON_VERSION: ${{ inputs.python-version }}

@@ -10,7 +10,7 @@ inputs:
     artifacts-dir:
         description: 'Directory for storing all artifacts'
         required: false
-        default: '/home/runner/work/artifacts'
+        default: 'artifacts'
 
 runs:
     using: 'composite'
@@ -30,15 +30,16 @@ runs:
           shell: bash
           run: |
               echo "=== Restoring Environment Configuration ==="
+              ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ inputs.artifacts-dir }}"
 
               # Verify artifacts structure
               echo "Downloaded artifacts structure:"
-              ls -la "${{ inputs.artifacts-dir }}"
+              ls -la "$ARTIFACTS_PATH"
 
               # Check for required components
               components="poetry-cache poetry-data venv source python-env.sh"
               for component in $components; do
-                  if [ -e "${{ inputs.artifacts-dir }}/$component" ]; then
+                  if [ -e "$ARTIFACTS_PATH/$component" ]; then
                       echo "✓ Found: $component"
                   else
                       echo "✗ Missing: $component"
@@ -47,17 +48,18 @@ runs:
               done
 
               # Source environment configuration
-              env_file="${{ inputs.artifacts-dir }}/python-env.sh"
+              env_file="$ARTIFACTS_PATH/python-env.sh"
               if [ -f "$env_file" ]; then
                   echo "Sourcing environment configuration..."
                   source "$env_file"
 
                   # Export for subsequent steps in the job
-                  artifacts_dir="${{ inputs.artifacts-dir }}"
-                  echo "ARTIFACTS_DIR=$artifacts_dir" >> $GITHUB_ENV
-                  echo "PROJECT_DIR=$artifacts_dir/source" >> $GITHUB_ENV
-                  echo "POETRY_CACHE_DIR=$artifacts_dir/poetry-cache" >> $GITHUB_ENV
-                  echo "POETRY_DATA_DIR=$artifacts_dir/poetry-data" >> $GITHUB_ENV
+                  echo "ARTIFACTS_DIR=$ARTIFACTS_PATH" >> $GITHUB_ENV
+                  echo "PROJECT_DIR=$ARTIFACTS_PATH/source" >> $GITHUB_ENV
+                  cache_dir="$ARTIFACTS_PATH/poetry-cache"
+                  echo "POETRY_CACHE_DIR=$cache_dir" >> $GITHUB_ENV
+                  data_dir="$ARTIFACTS_PATH/poetry-data"
+                  echo "POETRY_DATA_DIR=$data_dir" >> $GITHUB_ENV
                   echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
                   echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH
 
@@ -71,14 +73,17 @@ runs:
           shell: bash
           run: |
               echo "Restoring executable permissions..."
+              ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ inputs.artifacts-dir }}"
 
-              # Find and restore executable permissions for Python executables
-              venv_dir="${{ inputs.artifacts-dir }}/venv"
-              find "$venv_dir" -name "python*" -type f -exec chmod +x {} \; || true
-              find "$venv_dir" -path "*/bin/*" -type f -exec chmod +x {} \; || true
+              # Find and restore executable permissions for Python binaries
+              venv_dir="$ARTIFACTS_PATH/venv"
+              find "$venv_dir" -name "python*" -type f -exec chmod +x {} \; \
+                  || true
+              find "$venv_dir" -path "*/bin/*" -type f -exec chmod +x {} \; \
+                  || true
 
               # Ensure the environment script is executable
-              chmod +x "${{ inputs.artifacts-dir }}/python-env.sh"
+              chmod +x "$ARTIFACTS_PATH/python-env.sh"
 
               echo "Permissions restored successfully"
 
@@ -86,9 +91,10 @@ runs:
           shell: bash
           run: |
               echo "=== Configuring Poetry and Verifying Environment ==="
+              ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ inputs.artifacts-dir }}"
 
               # Source environment
-              source "${{ inputs.artifacts-dir }}/python-env.sh"
+              source "$ARTIFACTS_PATH/python-env.sh"
 
               echo "Python version: $(python --version)"
               echo "Virtual environment: $VIRTUAL_ENV"
@@ -111,12 +117,11 @@ runs:
               pip install poetry
 
               # Configure Poetry to use restored directories
-              artifacts_dir="${{ inputs.artifacts-dir }}"
               poetry config virtualenvs.create true
               poetry config virtualenvs.in-project false
-              poetry config virtualenvs.path "$artifacts_dir/venv"
-              poetry config cache-dir "$artifacts_dir/poetry-cache"
-              poetry config data-dir "$artifacts_dir/poetry-data"
+              poetry config virtualenvs.path "$ARTIFACTS_PATH/venv"
+              poetry config cache-dir "$ARTIFACTS_PATH/poetry-cache"
+              poetry config data-dir "$ARTIFACTS_PATH/poetry-data"
 
               echo "✓ Poetry configured successfully"
               poetry env info
