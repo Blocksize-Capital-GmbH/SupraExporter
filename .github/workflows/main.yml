@@ -37,6 +37,7 @@ jobs:
               run: |
                   poetry config virtualenvs.in-project true
                   poetry config virtualenvs.create true
+                  poetry config --list
 
             - name: Cache Poetry dependencies
               uses: actions/cache@v4
@@ -47,10 +48,28 @@ jobs:
                   restore-keys: |
                       poetry-${{ runner.os }}-
 
-            - name: Install project dependencies
+            - name: Install project dependencies and create virtual environment
               run: |
                   cp .env.example .env
                   poetry install -vv --no-root
+                  
+            - name: Verify virtual environment location
+              run: |
+                  echo "Checking for .venv directory..."
+                  if [ -d ".venv" ]; then
+                      echo "✓ .venv directory found"
+                      ls -la .venv/
+                      echo "Virtual environment size:"
+                      du -sh .venv/
+                  else
+                      echo "✗ .venv directory not found"
+                      echo "Poetry environment info:"
+                      poetry env info
+                      echo "Looking for virtual environments..."
+                      find /tmp -name "*venv*" -type d 2>/dev/null || true
+                      find /home/runner -name "*venv*" -type d 2>/dev/null || true
+                      exit 1
+                  fi
 
             - name: Upload virtual environment artifact
               uses: actions/upload-artifact@v4
@@ -84,6 +103,12 @@ jobs:
 
             - name: Setup project environment
               run: cp .env.example .env
+
+            - name: Verify virtual environment
+              run: |
+                  echo "Virtual environment contents:"
+                  ls -la .venv/bin/
+                  ./.venv/bin/python --version
 
             - name: Run test suite with coverage
               run: >-
