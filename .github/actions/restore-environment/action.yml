@@ -49,6 +49,20 @@ runs:
             exit 1
         fi
 
+        # Restore executable permissions for virtual environment
+        echo "Restoring executable permissions..."
+        VENV_DIR="$ARTIFACTS_PATH/venv"
+        if [ -d "$VENV_DIR" ]; then
+            find "$VENV_DIR" -name "python*" -type f -exec chmod +x {} \; \
+                2>/dev/null || true
+            find "$VENV_DIR" -path "*/bin/*" -type f -exec chmod +x {} \; \
+                2>/dev/null || true
+            echo "✅ Virtual environment permissions restored"
+        fi
+
+        # Make environment script executable
+        chmod +x "$ENV_SCRIPT_PATH"
+
         # Source environment and export variables for job
         echo "Sourcing environment configuration..."
         source "$ENV_SCRIPT_PATH"
@@ -62,5 +76,14 @@ runs:
         echo "Configuring Poetry to use restored virtual environment..."
         poetry config virtualenvs.create false
         poetry config virtualenvs.path "$ARTIFACTS_PATH/venv"
+
+        # Verify the virtual environment works
+        echo "Verifying virtual environment..."
+        if [ -f "${VIRTUAL_ENV}/bin/python" ]; then
+            echo "Python in venv: $(${VIRTUAL_ENV}/bin/python --version)"
+            echo "✅ Virtual environment is functional"
+        else
+            echo "Warning: Python binary not found in virtual environment"
+        fi
 
         echo "✅ Environment restored successfully"

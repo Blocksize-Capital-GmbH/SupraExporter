@@ -67,10 +67,31 @@ jobs:
 
             - name: Run test suite with coverage
               run: |
+                  set -e
+                  echo "=== Running Test Suite ==="
+                  
+                  # Source environment
                   source "${{ env.ARTIFACTS_DIR }}/python-env.sh"
                   cd "$PROJECT_DIR"
                   
+                  # Verify permissions and environment
+                  echo "Current directory: $(pwd)"
+                  echo "Virtual environment: $VIRTUAL_ENV"
+                  echo "Python executable: $(which python)"
+                  echo "Python version: $(python --version)"
+                  
+                  # Verify test directory exists and is accessible
+                  if [ ! -d "supraexporter/tests/" ]; then
+                      echo "Error: Test directory not found"
+                      ls -la supraexporter/
+                      exit 1
+                  fi
+                  
+                  echo "Test directory contents:"
+                  ls -la supraexporter/tests/
+                  
                   # Execute tests via poetry (reproducing local workflow)
+                  echo "Running pytest with coverage..."
                   poetry run pytest supraexporter/tests/ -v \
                       --cov=supraexporter --cov-report=html --cov-report=term-missing
 
