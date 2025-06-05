@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
     supra-metrics-exporter:
-        build: .
+        image: ghcr.io/blocksize-capital-gmbh/supraexporter:latest
         container_name: supra_blockchain_metrics_exporter
         network_mode: host
         restart: unless-stopped
