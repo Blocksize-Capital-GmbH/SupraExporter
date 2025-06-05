@@ -1,1 +1,17 @@
 .idea/
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.env
+.envrc
+
+# Log files
+*.log
+
+# Coverage reports
+.coverage
+node_modules
+.venv

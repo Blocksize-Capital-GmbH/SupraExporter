@@ -1,0 +1,79 @@
+---
+name: CI Pipeline
+
+"on":
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main, develop]
+
+permissions:
+    packages: write
+    contents: read
+    actions: read
+
+env:
+    PYTHON_VERSION: "3.12"
+    ARTIFACTS_DIR: "artifacts"
+
+jobs:
+    setup:
+        name: Setup Environment
+        uses: ./.github/workflows/setup-environment.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+
+    tests:
+        name: Run Tests
+        needs: setup
+        uses: ./.github/workflows/tests.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+
+    format:
+        name: Check Code Formatting
+        needs: setup
+        uses: ./.github/workflows/format.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+
+    lint:
+        name: Run Code Linting
+        needs: setup
+        uses: ./.github/workflows/lint.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+
+    type-check:
+        name: Run Type Checking
+        needs: setup
+        uses: ./.github/workflows/type-check.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+
+    docstring-check:
+        name: Check Documentation Strings
+        needs: setup
+        uses: ./.github/workflows/docstring-check.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+
+    pre-commit-all:
+        name: Run All Pre-commit Hooks
+        needs: setup
+        uses: ./.github/workflows/pre-commit-all.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+
+    docker:
+        name: Build and Test Docker Image
+        uses: ./.github/workflows/docker.yml
+        with:
+            docker-tag: "test"
