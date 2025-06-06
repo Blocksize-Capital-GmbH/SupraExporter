@@ -3,9 +3,9 @@ name: CI Pipeline
 
 "on":
     push:
-        branches: [main, develop]
+        branches: ["*"]
     pull_request:
-        branches: [main, develop]
+        branches: [main]
 
 permissions:
     packages: write
@@ -24,56 +24,124 @@ jobs:
             python-version: "3.12"
             artifacts-dir: "artifacts"
 
-    tests:
-        name: Run Tests
-        needs: setup
-        uses: ./.github/workflows/tests.yml
-        with:
-            python-version: "3.12"
-            artifacts-dir: "artifacts"
-
-    format:
-        name: Check Code Formatting
+    # Main branch workflow - run all checks
+    format_main:
+        name: Check Code Formatting (Main)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
         needs: setup
         uses: ./.github/workflows/format.yml
         with:
             python-version: "3.12"
             artifacts-dir: "artifacts"
 
-    lint:
-        name: Run Code Linting
+    lint_main:
+        name: Run Code Linting (Main)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
         needs: setup
         uses: ./.github/workflows/lint.yml
         with:
             python-version: "3.12"
             artifacts-dir: "artifacts"
 
-    type-check:
-        name: Run Type Checking
+    type_check_main:
+        name: Run Type Checking (Main)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
         needs: setup
         uses: ./.github/workflows/type-check.yml
         with:
             python-version: "3.12"
             artifacts-dir: "artifacts"
 
-    docstring-check:
-        name: Check Documentation Strings
+    docstring_check_main:
+        name: Check Documentation Strings (Main)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
         needs: setup
         uses: ./.github/workflows/docstring-check.yml
         with:
             python-version: "3.12"
             artifacts-dir: "artifacts"
 
-    pre-commit-all:
-        name: Run All Pre-commit Hooks
+    pre_commit_all_main:
+        name: Run All Pre-commit Hooks (Main)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
         needs: setup
         uses: ./.github/workflows/pre-commit-all.yml
         with:
             python-version: "3.12"
             artifacts-dir: "artifacts"
 
-    docker:
-        name: Build and Test Docker Image
+    tests_main:
+        name: Run Tests (Main)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+        needs: setup
+        uses: ./.github/workflows/tests.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+            skip-coverage: "false"
+
+    # Different workflow for other branches (not main)
+    format_branch:
+        name: Check Code Formatting (Branch)
+        if: github.ref != 'refs/heads/main' && !(github.event_name == 'pull_request' && github.base_ref == 'main')
+        needs: setup
+        uses: ./.github/workflows/format.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+
+    lint_branch:
+        name: Run Code Linting (Branch)
+        if: github.ref != 'refs/heads/main' && !(github.event_name == 'pull_request' && github.base_ref == 'main')
+        needs: setup
+        uses: ./.github/workflows/lint.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+
+    type_check_branch:
+        name: Run Type Checking (Branch)
+        if: github.ref != 'refs/heads/main' && !(github.event_name == 'pull_request' && github.base_ref == 'main')
+        needs: setup
+        uses: ./.github/workflows/type-check.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+
+    # Test without coverage for non-main branches
+    tests_branch:
+        name: Run Tests Without Coverage (Branch)
+        if: github.ref != 'refs/heads/main' && !(github.event_name == 'pull_request' && github.base_ref == 'main')
+        needs: setup
+        uses: ./.github/workflows/tests.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+            skip-coverage: "true"
+
+    # Build and push Docker for main branch or PR to main
+    docker_main:
+        name: Build and Push Docker Image (Main)
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+        needs:
+            [
+                format_main,
+                lint_main,
+                type_check_main,
+                docstring_check_main,
+                pre_commit_all_main,
+                tests_main,
+            ]
         uses: ./.github/workflows/docker.yml
         with:
-            docker-tag: "test"
+            build-type: "main"
+
+    # Build and push Docker for other branches
+    docker_branch:
+        name: Build and Push Docker Image (Branch)
+        if: github.ref != 'refs/heads/main' && !(github.event_name == 'pull_request' && github.base_ref == 'main')
+        needs: [format_branch, lint_branch, type_check_branch, tests_branch]
+        uses: ./.github/workflows/docker.yml
+        with:
+            build-type: "branch"
+            branch-name: ${{ github.ref_name }}
