@@ -119,6 +119,30 @@ jobs:
             artifacts-dir: "artifacts"
             skip-coverage: "true"
 
+    # Security scanning
+    security_scan:
+        name: Security Scan
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+        runs-on: ubuntu-22.04
+        needs: setup
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Run Trivy vulnerability scanner
+              uses: aquasecurity/trivy-action@master
+              with:
+                  scan-type: "fs"
+                  scan-ref: "."
+                  format: "sarif"
+                  output: "trivy-results.sarif"
+
+            - name: Upload Trivy scan results to GitHub Security tab
+              uses: github/codeql-action/upload-sarif@v3
+              if: always()
+              with:
+                  sarif_file: "trivy-results.sarif"
+
     # Build and push Docker for main branch or PR to main
     docker_main:
         name: Build and Push Docker Image (Main)
@@ -131,6 +155,7 @@ jobs:
                 docstring_check_main,
                 pre_commit_all_main,
                 tests_main,
+                security_scan,
             ]
         uses: ./.github/workflows/docker.yml
         with:
@@ -145,3 +170,22 @@ jobs:
         with:
             build-type: "branch"
             branch-name: ${{ github.ref_name }}
+
+    # Final status check
+    ci_success:
+        name: CI Pipeline Success
+        runs-on: ubuntu-22.04
+        if: always()
+        needs: [docker_main, docker_branch]
+        steps:
+            - name: Check CI status
+              run: |
+                  if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
+                      echo "❌ CI Pipeline failed"
+                      exit 1
+                  elif [[ "${{ contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
+                      echo "⚠️ CI Pipeline was cancelled"
+                      exit 1
+                  else
+                      echo "✅ CI Pipeline completed successfully"
+                  fi
