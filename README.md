@@ -1,9 +1,19 @@
 # Supra Blockchain Metrics Exporter
 
+<div align="center">
+  <img src="https://supra.com/assets/supra-logo.svg" alt="Supra" height="80"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://blocksize.info/assets/blocksize-logo.svg" alt="Blocksize Capital" height="80"/>
+</div>
+
+<div align="center">
+
 [![CI Pipeline](https://github.com/blocksize-capital-gmbh/supra-blockchain-metrics-exporter/actions/workflows/main.yml/badge.svg)](https://github.com/blocksize-capital-gmbh/supra-blockchain-metrics-exporter/actions/workflows/main.yml)
 [![Docker Image](https://ghcr-badge.egpl.dev/blocksize-capital-gmbh/supraexporter/latest_tag?trim=major&label=latest)](https://ghcr.io/blocksize-capital-gmbh/supraexporter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+
+</div>
 
 A production-ready Prometheus metrics exporter for Supra blockchain nodes. This exporter provides comprehensive monitoring capabilities for both validator and RPC nodes, enabling operators to track node health, block heights, and network participation.
 
@@ -90,15 +100,20 @@ The exporter is configured via environment variables, typically set in a `.env` 
 
 ### Finding Your Network Public Key
 
-To find your validator's public key, check your validator logs or configuration:
+To find your validator's public key, check the validator identity configuration file:
 
 ```bash
-# Look for public key in validator logs
+# Primary method: Check the validator public identity file
+cat supra_config/validator_public_identity.toml
+
+# Alternative: Look for public key in validator logs
 grep -i "pubkey\|public.*key" /path/to/validator.log
 
-# Or check validator configuration files
-cat /path/to/validator/config.toml | grep -i "pubkey\|public.*key"
+# Or search in other validator configuration files
+find supra_config/ -name "*.toml" -exec grep -l "public" {} \;
 ```
+
+The public key is typically found in the `validator_public_identity.toml` file within your `supra_config` directory.
 
 ## Metrics
 
@@ -358,15 +373,21 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: [GitHub Issues](https://github.com/blocksize-capital-gmbh/supra-blockchain-metrics-exporter/issues)
 - **Documentation**: [Project Wiki](https://github.com/blocksize-capital-gmbh/supra-blockchain-metrics-exporter/wiki)
-- **Security**: Report security vulnerabilities to security@blocksize-capital.com
+- **Security**: Report security vulnerabilities via our [contact form](https://blocksize.info/contact/)
 
 ## Acknowledgments
 
 - Built for the [Supra](https://supra.com/) blockchain ecosystem
-- Developed by [Blocksize Capital](https://blocksize-capital.com/)
+- Developed by [Blocksize Capital](https://blocksize.info/) - Professional blockchain infrastructure and staking services
 - Uses [Prometheus](https://prometheus.io/) for metrics exposition
 - Containerized with [Docker](https://www.docker.com/)
 
 ---
 
-**Made with ❤️ by Blocksize Capital for the Supra community**
+<div align="center">
+
+**Made with ❤️ by [Blocksize Capital](https://blocksize.info/) for the [Supra](https://supra.com/) community**
+
+_Need professional staking or infrastructure services? [Get in touch with Blocksize Capital](https://blocksize.info/contact/)_
+
+</div>
