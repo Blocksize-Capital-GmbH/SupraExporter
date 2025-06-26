@@ -1,9 +1,23 @@
 # Supra Blockchain Metrics Exporter
 
 <div align="center">
-  <img src="https://supra.com/assets/supra-logo.svg" alt="Supra" height="80"/>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://blocksize.info/assets/blocksize-logo.svg" alt="Blocksize Capital" height="80"/>
+  <!-- Blocksize Capital - Professional blockchain infrastructure (Your Company First) -->
+  <a href="https://blocksize.info" target="_blank">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/Blocksize_Logo/Logo_main_white.svg">
+      <img alt="Blocksize Capital" src=".github/assets/Blocksize_Logo/Logo_main.svg" height="50">
+    </picture>
+  </a>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+  <!-- Supra Blockchain -->
+  <a href="https://supra.com" target="_blank">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/Supra_Logos/SVG/SupraLogo-horz-onDark.svg">
+      <img alt="Supra" src=".github/assets/Supra_Logos/SVG/SupraLogo-horz-onLight.svg" height="50">
+    </picture>
+  </a>
 </div>
 
 <div align="center">
