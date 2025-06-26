@@ -1,11 +1,11 @@
 # Supra Blockchain Metrics Exporter
 
-<div align="center" style="display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap;">
+<div align="center" style="display: flex; justify-content: center; align-items: center; gap: 60px; flex-wrap: wrap;">
   <!-- Blocksize - Professional blockchain infrastructure -->
   <a href="https://blocksize.info" target="_blank">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/Blocksize_Logo/Logo_main_white.svg">
-      <img alt="Blocksize" src=".github/assets/Blocksize_Logo/Logo_main.svg" height="60">
+      <img alt="Blocksize" src=".github/assets/Blocksize_Logo/Logo_main.svg" height="48">
     </picture>
   </a>
 
@@ -13,7 +13,7 @@
   <a href="https://supra.com" target="_blank">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/Supra_Logos/SVG/SupraLogo-horz-onDark.svg">
-      <img alt="Supra" src=".github/assets/Supra_Logos/SVG/SupraLogo-horz-onLight.svg" height="60">
+      <img alt="Supra" src=".github/assets/Supra_Logos/SVG/SupraLogo-horz-onLight.svg" height="52">
     </picture>
   </a>
 </div>
