@@ -1,11 +1,11 @@
 # Supra Blockchain Metrics Exporter
 
 <div align="center">
-  <!-- Blocksize Capital - Professional blockchain infrastructure (Your Company First) -->
+  <!-- Blocksize - Professional blockchain infrastructure (Your Company First) -->
   <a href="https://blocksize.info" target="_blank">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/Blocksize_Logo/Logo_main_white.svg">
-      <img alt="Blocksize Capital" src=".github/assets/Blocksize_Logo/Logo_main.svg" height="50">
+      <img alt="Blocksize" src=".github/assets/Blocksize_Logo/Logo_main.svg" height="50">
     </picture>
   </a>
 
@@ -392,7 +392,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - Built for the [Supra](https://supra.com/) blockchain ecosystem
-- Developed by [Blocksize Capital](https://blocksize.info/) - Professional blockchain infrastructure and staking services
+- Developed by [Blocksize](https://blocksize.info/) - Professional blockchain infrastructure and staking services
 - Uses [Prometheus](https://prometheus.io/) for metrics exposition
 - Containerized with [Docker](https://www.docker.com/)
 
@@ -400,8 +400,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
 
-**Made with ❤️ by [Blocksize Capital](https://blocksize.info/) for the [Supra](https://supra.com/) community**
+**Made with ❤️ by [Blocksize](https://blocksize.info/) for the [Supra](https://supra.com/) community**
 
-_Need professional staking or infrastructure services? [Get in touch with Blocksize Capital](https://blocksize.info/contact/)_
+_Need professional staking or infrastructure services? [Get in touch with Blocksize](https://blocksize.info/contact/)_
 
 </div>
