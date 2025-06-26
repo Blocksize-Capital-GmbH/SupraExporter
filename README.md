@@ -1,23 +1,28 @@
 # Supra Blockchain Metrics Exporter
 
 <div align="center">
-  <!-- Blocksize - Professional blockchain infrastructure -->
-  <a href="https://blocksize.info" target="_blank">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/Blocksize_Logo/Logo_main_white.svg">
-      <img alt="Blocksize" src=".github/assets/Blocksize_Logo/Logo_main.svg" height="50">
-    </picture>
-  </a>
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-  <!-- Supra Blockchain -->
-  <a href="https://supra.com" target="_blank">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/Supra_Logos/SVG/SupraLogo-horz-onDark.svg">
-      <img alt="Supra" src=".github/assets/Supra_Logos/SVG/SupraLogo-horz-onLight.svg" height="50">
-    </picture>
-  </a>
+  <table border="0" cellpadding="0" cellspacing="0" style="border: none; margin: 0 auto;">
+    <tr>
+      <td align="center" style="padding: 0 20px 0 0; border: none;">
+        <!-- Blocksize - Professional blockchain infrastructure -->
+        <a href="https://blocksize.info" target="_blank">
+          <picture>
+            <source media="(prefers-color-scheme: dark)" srcset=".github/assets/Blocksize_Logo/Logo_main_white.svg">
+            <img alt="Blocksize" src=".github/assets/Blocksize_Logo/Logo_main.svg" height="60">
+          </picture>
+        </a>
+      </td>
+      <td align="center" style="padding: 0 0 0 20px; border: none;">
+        <!-- Supra Blockchain -->
+        <a href="https://supra.com" target="_blank">
+          <picture>
+            <source media="(prefers-color-scheme: dark)" srcset=".github/assets/Supra_Logos/SVG/SupraLogo-horz-onDark.svg">
+            <img alt="Supra" src=".github/assets/Supra_Logos/SVG/SupraLogo-horz-onLight.svg" height="60">
+          </picture>
+        </a>
+      </td>
+    </tr>
+  </table>
 </div>
 
 <div align="center">
