@@ -1,7 +1,7 @@
 # Supra Blockchain Metrics Exporter
 
 <div align="center">
-  <!-- Blocksize - Professional blockchain infrastructure (Your Company First) -->
+  <!-- Blocksize - Professional blockchain infrastructure -->
   <a href="https://blocksize.info" target="_blank">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/Blocksize_Logo/Logo_main_white.svg">
