@@ -41,7 +41,7 @@ jobs:
               id: meta
               uses: docker/metadata-action@v5
               with:
-                  images: ghcr.io/blocksize-capital-gmbh/supraexporter
+                  images: ghcr.io/Blocksize-Capital-GmbH/supraexporter
                   tags: |
                       type=raw,value=latest,enable=${{ inputs.build-type == 'main' && github.ref == 'refs/heads/main' }}
                       type=sha,format=long
@@ -63,9 +63,20 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                   PACKAGE_NAME="supraexporter"
-                  OWNER="blocksize-capital-gmbh"
-                  curl -X PATCH \
+                  OWNER="Blocksize-Capital-GmbH"
+
+                  echo "Attempting to set package visibility to public..."
+                  response=$(curl -s -w "%{http_code}" -X PATCH \
                       -H "Accept: application/vnd.github+json" \
                       -H "Authorization: Bearer $GITHUB_TOKEN" \
                       https://api.github.com/orgs/$OWNER/packages/container/$PACKAGE_NAME \
-                      -d '{"visibility":"public"}'
+                      -d '{"visibility":"public"}')
+
+                  http_code="${response: -3}"
+                  if [ "$http_code" = "200" ] || [ "$http_code" = "204" ]; then
+                      echo "✅ Package visibility set to public successfully"
+                  else
+                      echo "⚠️ Failed to set package visibility (HTTP $http_code)"
+                      echo "This might be due to permissions or the package not existing yet"
+                      echo "Continuing anyway as this is not critical for the build"
+                  fi
