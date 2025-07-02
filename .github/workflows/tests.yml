@@ -5,15 +5,15 @@ name: Run Tests
     workflow_call:
         inputs:
             python-version:
-                description: "Python version to use"
+                description: 'Python version to use'
                 required: false
                 type: string
-                default: "3.12"
+                default: '3.12'
             artifacts-dir:
-                description: "Directory for storing all artifacts"
+                description: 'Directory for storing all artifacts'
                 required: false
                 type: string
-                default: "artifacts"
+                default: 'artifacts'
 
 env:
     PYTHON_VERSION: ${{ inputs.python-version }}
@@ -38,7 +38,7 @@ jobs:
                   echo "Artifacts directory: $ARTIFACTS_PATH"
                   echo "Current working directory: $(pwd)"
                   echo "Workspace: $GITHUB_WORKSPACE"
-
+                  
                   # Check for non-hidden github-actions directory first
                   if [ -d "$ARTIFACTS_PATH/github-actions" ]; then
                       echo "✓ Found github-actions directory"
@@ -69,27 +69,27 @@ jobs:
               run: |
                   set -e
                   echo "=== Running Test Suite ==="
-
+                  
                   # Source environment
                   source "${{ env.ARTIFACTS_DIR }}/python-env.sh"
                   cd "$PROJECT_DIR"
-
+                  
                   # Verify permissions and environment
                   echo "Current directory: $(pwd)"
                   echo "Virtual environment: $VIRTUAL_ENV"
                   echo "Python executable: $(which python)"
                   echo "Python version: $(python --version)"
-
+                  
                   # Verify test directory exists and is accessible
                   if [ ! -d "supraexporter/tests/" ]; then
                       echo "Error: Test directory not found"
                       ls -la supraexporter/
                       exit 1
                   fi
-
+                  
                   echo "Test directory contents:"
                   ls -la supraexporter/tests/
-
+                  
                   # Execute tests via poetry (reproducing local workflow)
                   echo "Running pytest with coverage..."
                   poetry run pytest supraexporter/tests/ -v \

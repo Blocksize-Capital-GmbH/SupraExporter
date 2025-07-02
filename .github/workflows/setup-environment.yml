@@ -5,18 +5,18 @@ on:
     workflow_call:
         inputs:
             python-version:
-                description: "Python version to use"
+                description: 'Python version to use'
                 required: false
                 type: string
-                default: "3.12"
+                default: '3.12'
             artifacts-dir:
-                description: "Directory for storing all artifacts"
+                description: 'Directory for storing all artifacts'
                 required: false
                 type: string
-                default: "artifacts"
+                default: 'artifacts'
         outputs:
             artifacts-path:
-                description: "Path to the artifacts directory"
+                description: 'Path to the artifacts directory'
                 value: ${{ jobs.setup.outputs.artifacts-path }}
 
 env:
@@ -39,10 +39,10 @@ jobs:
                   mkdir -p "$ARTIFACTS_PATH/poetry-data"
                   mkdir -p "$ARTIFACTS_PATH/venv"
                   mkdir -p "$ARTIFACTS_PATH/source"
-
+                  
                   echo "Artifacts directory structure created:"
                   ls -la "$ARTIFACTS_PATH"
-
+                  
                   echo "artifacts-path=$ARTIFACTS_PATH" >> $GITHUB_OUTPUT
 
             - name: Setup Python environment
@@ -60,19 +60,19 @@ jobs:
               run: |
                   echo "Copying .github directory to ensure it's included in artifacts..."
                   ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
-
+                  
                   # Verify .github directory exists in source
                   if [ -d "$ARTIFACTS_PATH/source/.github" ]; then
                       echo "✓ Found .github directory in source"
-
+                      
                       # Copy to non-hidden location
                       cp -r "$ARTIFACTS_PATH/source/.github" "$ARTIFACTS_PATH/github-actions"
                       echo "✓ Copied .github to github-actions (non-hidden)"
-
+                      
                       # Verify the copy worked
                       echo "Contents of github-actions directory:"
                       ls -la "$ARTIFACTS_PATH/github-actions/"
-
+                      
                       if [ -f "$ARTIFACTS_PATH/github-actions/actions/restore-environment/action.yml" ]; then
                           echo "✓ Composite action found in copied directory"
                       else
@@ -92,26 +92,26 @@ jobs:
               run: |
                   set -e
                   echo "Configuring Poetry with unified artifacts structure..."
-
+                  
                   # Define directories
                   ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
                   POETRY_VENV_PATH="$ARTIFACTS_PATH/venv"
                   POETRY_CACHE_DIR="$ARTIFACTS_PATH/poetry-cache"
                   POETRY_DATA_DIR="$ARTIFACTS_PATH/poetry-data"
-
+                  
                   # Verify Poetry installation
                   echo "Poetry version: $(poetry --version)"
-
+                  
                   # Configure Poetry to use artifacts directories
                   poetry config virtualenvs.create true
                   poetry config virtualenvs.in-project false
                   poetry config virtualenvs.path "$POETRY_VENV_PATH"
                   poetry config cache-dir "$POETRY_CACHE_DIR"
-
+                  
                   # Set environment variable for data-dir (workaround for Poetry version compatibility)
                   # Note: data-dir config option not available in all Poetry versions
                   echo "POETRY_DATA_DIR=$POETRY_DATA_DIR" >> $GITHUB_ENV
-
+                  
                   # Display configuration
                   echo "Poetry configuration:"
                   poetry config --list
@@ -133,7 +133,7 @@ jobs:
                   echo "Installing project dependencies..."
                   cp .env.example .env
                   poetry install -vv --no-root
-
+                  
                   echo "Verifying installation..."
                   poetry env info
 
@@ -145,17 +145,17 @@ jobs:
                   echo "Poetry version: $(poetry --version)"
                   ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
                   echo "Artifacts directory: $ARTIFACTS_PATH"
-
+                  
                   echo "=== Poetry Environment Info ==="
                   cd "$ARTIFACTS_PATH/source"
                   poetry env info
-
+                  
                   echo "=== Virtual Environment Verification ==="
                   VENV_NAME=$(cd "$ARTIFACTS_PATH/source" && poetry env info --path | xargs basename)
                   VENV_FULL_PATH="$ARTIFACTS_PATH/venv/$VENV_NAME"
-
+                  
                   echo "Expected venv path: $VENV_FULL_PATH"
-
+                  
                   if [ -d "$VENV_FULL_PATH" ]; then
                       echo "✓ Virtual environment found at: $VENV_FULL_PATH"
                       echo "Size: $(du -sh "$VENV_FULL_PATH")"
@@ -174,7 +174,7 @@ jobs:
                   cat > "$ARTIFACTS_PATH/python-env.sh" << EOF
                   #!/bin/bash
                   # Environment configuration for SupraExporter CI
-
+                  
                   # Python environment
                   export PYTHON_VERSION="${{ env.PYTHON_VERSION }}"
                   export pythonLocation="${{ steps.setup-python.outputs.python-path }}"
@@ -183,26 +183,26 @@ jobs:
                   export Python2_ROOT_DIR="${{ steps.setup-python.outputs.python-path }}"
                   export Python3_ROOT_DIR="${{ steps.setup-python.outputs.python-path }}"
                   export LD_LIBRARY_PATH="${{ steps.setup-python.outputs.python-path }}/lib"
-
+                  
                   # Artifacts directories
                   export ARTIFACTS_DIR="$ARTIFACTS_PATH"
                   export POETRY_CACHE_DIR="$ARTIFACTS_PATH/poetry-cache"
                   export POETRY_DATA_DIR="$ARTIFACTS_PATH/poetry-data"
-
+                  
                   # Virtual environment
                   export VIRTUAL_ENV="${{ env.VENV_FULL_PATH }}"
                   export PATH="${{ env.VENV_FULL_PATH }}/bin:\$PATH"
-
+                  
                   # Working directory
                   export PROJECT_DIR="$ARTIFACTS_PATH/source"
-
+                  
                   echo "Environment configured successfully"
                   echo "Virtual environment: \$VIRTUAL_ENV"
                   echo "Project directory: \$PROJECT_DIR"
                   EOF
-
+                  
                   chmod +x "$ARTIFACTS_PATH/python-env.sh"
-
+                  
                   echo "Environment configuration created:"
                   cat "$ARTIFACTS_PATH/python-env.sh"
 
@@ -211,10 +211,10 @@ jobs:
                   echo "=== Final Artifacts Structure ==="
                   ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
                   find "$ARTIFACTS_PATH" -type f -name "python-env.sh" -o -name "pyvenv.cfg" -o -name "poetry.lock" | head -10
-
+                  
                   echo "=== Artifacts Directory Size ==="
                   du -sh "$ARTIFACTS_PATH"
-
+                  
                   echo "=== Artifacts Subdirectory Sizes ==="
                   du -sh "$ARTIFACTS_PATH"/*
 
@@ -225,4 +225,4 @@ jobs:
                   path: ${{ env.ARTIFACTS_DIR }}
                   retention-days: 1
                   if-no-files-found: error
-                  include-hidden-files: true
+                  include-hidden-files: true 

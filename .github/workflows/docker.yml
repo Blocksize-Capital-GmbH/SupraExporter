@@ -5,10 +5,10 @@ name: Build and Test Docker Image
     workflow_call:
         inputs:
             docker-tag:
-                description: "Docker image tag"
+                description: 'Docker image tag'
                 required: false
                 type: string
-                default: "test"
+                default: 'test'
 
 env:
     DOCKER_TAG: ${{ inputs.docker-tag }}

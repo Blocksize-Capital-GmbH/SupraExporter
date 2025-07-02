@@ -1,122 +1,122 @@
 ---
-name: "Restore Environment"
-description: "Restore Python environment and project setup from artifacts"
+name: 'Restore Environment'
+description: 'Restore Python environment and project setup from artifacts'
 
 inputs:
-    python-version:
-        description: "Python version to use"
-        required: false
-        default: "3.12"
-    artifacts-dir:
-        description: "Directory for storing all artifacts"
-        required: false
-        default: "artifacts"
+  python-version:
+    description: 'Python version to use'
+    required: false
+    default: '3.12'
+  artifacts-dir:
+    description: 'Directory for storing all artifacts'
+    required: false
+    default: 'artifacts'
 
 runs:
-    using: "composite"
-    steps:
-        - name: Set up Python environment with specified version
-          uses: actions/setup-python@v4
-          with:
-              python-version: ${{ inputs.python-version }}
+  using: 'composite'
+  steps:
+    - name: Set up Python environment with specified version
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ inputs.python-version }}
 
-        - name: Restore environment from artifacts and configure Poetry
-          shell: bash
-          run: |
-              set -e
-              echo "=== Restoring Environment from Artifacts ==="
+    - name: Restore environment from artifacts and configure Poetry
+      shell: bash
+      run: |
+        set -e
+        echo "=== Restoring Environment from Artifacts ==="
 
-              # Verify artifacts exist
-              ARTIFACTS_PATH="${{ inputs.artifacts-dir }}"
-              if ! test -d "$ARTIFACTS_PATH"; then
-                  echo "Error: Artifacts directory not found at expected path:"
-                  echo "  $ARTIFACTS_PATH"
-                  exit 1
-              fi
+        # Verify artifacts exist
+        ARTIFACTS_PATH="${{ inputs.artifacts-dir }}"
+        if ! test -d "$ARTIFACTS_PATH"; then
+            echo "Error: Artifacts directory not found at expected path:"
+            echo "  $ARTIFACTS_PATH"
+            exit 1
+        fi
 
-              ENV_SCRIPT_PATH="$ARTIFACTS_PATH/python-env.sh"
-              if ! test -f "$ENV_SCRIPT_PATH"; then
-                  echo "Error: Environment script not found at expected path:"
-                  echo "  $ENV_SCRIPT_PATH"
-                  exit 1
-              fi
+        ENV_SCRIPT_PATH="$ARTIFACTS_PATH/python-env.sh"
+        if ! test -f "$ENV_SCRIPT_PATH"; then
+            echo "Error: Environment script not found at expected path:"
+            echo "  $ENV_SCRIPT_PATH"
+            exit 1
+        fi
 
-              # Install Poetry only if not already available
-              echo "Checking Poetry installation..."
-              if ! command -v poetry >/dev/null 2>&1; then
-                  echo "Poetry not found, installing..."
-                  python -m pip install --upgrade pip
-                  pip install poetry
-                  echo "✅ Poetry installed"
-              else
-                  echo "✅ Poetry already available: $(poetry --version)"
-              fi
+        # Install Poetry only if not already available
+        echo "Checking Poetry installation..."
+        if ! command -v poetry >/dev/null 2>&1; then
+            echo "Poetry not found, installing..."
+            python -m pip install --upgrade pip
+            pip install poetry
+            echo "✅ Poetry installed"
+        else
+            echo "✅ Poetry already available: $(poetry --version)"
+        fi
 
-              # Restore executable permissions for virtual environment
-              echo "Restoring executable permissions..."
-              VENV_DIR="$ARTIFACTS_PATH/venv"
-              if [ -d "$VENV_DIR" ]; then
-                  find "$VENV_DIR" -name "python*" -type f -exec chmod +x {} \; \
-                      2>/dev/null || true
-                  find "$VENV_DIR" -path "*/bin/*" -type f -exec chmod +x {} \; \
-                      2>/dev/null || true
-                  echo "✅ Virtual environment permissions restored"
-              fi
+        # Restore executable permissions for virtual environment
+        echo "Restoring executable permissions..."
+        VENV_DIR="$ARTIFACTS_PATH/venv"
+        if [ -d "$VENV_DIR" ]; then
+            find "$VENV_DIR" -name "python*" -type f -exec chmod +x {} \; \
+                2>/dev/null || true
+            find "$VENV_DIR" -path "*/bin/*" -type f -exec chmod +x {} \; \
+                2>/dev/null || true
+            echo "✅ Virtual environment permissions restored"
+        fi
 
-              # Make environment script executable
-              chmod +x "$ENV_SCRIPT_PATH"
+        # Make environment script executable
+        chmod +x "$ENV_SCRIPT_PATH"
 
-              # Source environment and export variables for job
-              echo "Sourcing environment configuration..."
-              source "$ENV_SCRIPT_PATH"
+        # Source environment and export variables for job
+        echo "Sourcing environment configuration..."
+        source "$ENV_SCRIPT_PATH"
 
-              echo "ARTIFACTS_DIR=$ARTIFACTS_PATH" >> $GITHUB_ENV
-              echo "PROJECT_DIR=$ARTIFACTS_PATH/source" >> $GITHUB_ENV
-              echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
-              echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH
+        echo "ARTIFACTS_DIR=$ARTIFACTS_PATH" >> $GITHUB_ENV
+        echo "PROJECT_DIR=$ARTIFACTS_PATH/source" >> $GITHUB_ENV
+        echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV
+        echo "${VIRTUAL_ENV}/bin" >> $GITHUB_PATH
 
-              # Configure Poetry
-              echo "Configuring Poetry to use restored virtual environment..."
-              poetry config virtualenvs.create false
-              poetry config virtualenvs.path "$ARTIFACTS_PATH/venv"
+        # Configure Poetry
+        echo "Configuring Poetry to use restored virtual environment..."
+        poetry config virtualenvs.create false
+        poetry config virtualenvs.path "$ARTIFACTS_PATH/venv"
 
-              # Ensure .env file is available in project directory
-              echo "Ensuring .env configuration is available..."
-              echo "Checking for configuration files in project directory..."
-              ls -la "$ARTIFACTS_PATH/source/" | grep -E '\.(env|example)' || \
-                  echo "No .env files found"
+        # Ensure .env file is available in project directory
+        echo "Ensuring .env configuration is available..."
+        echo "Checking for configuration files in project directory..."
+        ls -la "$ARTIFACTS_PATH/source/" | grep -E '\.(env|example)' || \
+            echo "No .env files found"
 
-              if [ -f "$ARTIFACTS_PATH/source/.env" ]; then
-                  echo "✅ .env file found in project"
-              elif [ -f "$ARTIFACTS_PATH/source/.env.example" ]; then
-                  echo "Creating .env from .env.example..."
-                  cp "$ARTIFACTS_PATH/source/.env.example" \
-                     "$ARTIFACTS_PATH/source/.env"
-                  echo "✅ .env file created from example"
-              else
-                  echo "❌ Neither .env nor .env.example found in artifacts"
-                  echo "This should not happen with include-hidden-files: true"
-                  exit 1
-              fi
+        if [ -f "$ARTIFACTS_PATH/source/.env" ]; then
+            echo "✅ .env file found in project"
+        elif [ -f "$ARTIFACTS_PATH/source/.env.example" ]; then
+            echo "Creating .env from .env.example..."
+            cp "$ARTIFACTS_PATH/source/.env.example" \
+               "$ARTIFACTS_PATH/source/.env"
+            echo "✅ .env file created from example"
+        else
+            echo "❌ Neither .env nor .env.example found in artifacts"
+            echo "This should not happen with include-hidden-files: true"
+            exit 1
+        fi
 
-              # Verify .env file exists and show its contents
-              if [ -f "$ARTIFACTS_PATH/source/.env" ]; then
-                  echo "✅ Final .env file verification:"
-                  echo "File size: $(wc -l < "$ARTIFACTS_PATH/source/.env") lines"
-                  echo "Contents preview:"
-                  head -5 "$ARTIFACTS_PATH/source/.env" | sed 's/^/  /'
-              else
-                  echo "❌ .env file still not available"
-                  exit 1
-              fi
+        # Verify .env file exists and show its contents
+        if [ -f "$ARTIFACTS_PATH/source/.env" ]; then
+            echo "✅ Final .env file verification:"
+            echo "File size: $(wc -l < "$ARTIFACTS_PATH/source/.env") lines"
+            echo "Contents preview:"
+            head -5 "$ARTIFACTS_PATH/source/.env" | sed 's/^/  /'
+        else
+            echo "❌ .env file still not available"
+            exit 1
+        fi
 
-              # Verify the virtual environment works
-              echo "Verifying virtual environment..."
-              if [ -f "${VIRTUAL_ENV}/bin/python" ]; then
-                  echo "Python in venv: $(${VIRTUAL_ENV}/bin/python --version)"
-                  echo "✅ Virtual environment is functional"
-              else
-                  echo "Warning: Python binary not found in virtual environment"
-              fi
+        # Verify the virtual environment works
+        echo "Verifying virtual environment..."
+        if [ -f "${VIRTUAL_ENV}/bin/python" ]; then
+            echo "Python in venv: $(${VIRTUAL_ENV}/bin/python --version)"
+            echo "✅ Virtual environment is functional"
+        else
+            echo "Warning: Python binary not found in virtual environment"
+        fi
 
-              echo "✅ Environment restored successfully"
+        echo "✅ Environment restored successfully"
