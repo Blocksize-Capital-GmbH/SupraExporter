@@ -70,6 +70,14 @@ runs:
         echo "Sourcing environment configuration..."
         source "$ENV_SCRIPT_PATH"
 
+        echo "verifying permissions were set by env $ENV_SCRIPT_PATH"
+
+        ls -ltr $ARTIFACTS_PATH
+        ls -ltr $VENV_DIR
+        ls -ltr $VIRTUAL_ENV
+        ls -ltr $PROJECT_DIR
+        ls -ltr $ARTIFACTS_PATH/source"
+
         echo "ARTIFACTS_DIR=$ARTIFACTS_PATH" >> $GITHUB_ENV
         echo "PROJECT_DIR=$ARTIFACTS_PATH/source" >> $GITHUB_ENV
         echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> $GITHUB_ENV

@@ -87,7 +87,9 @@ jobs:
               run: |
                   python -m pip install --upgrade pip
                   pip install poetry
-
+            - name: Fix permissions on artifacts directory
+              run: |
+              
             - name: Configure Poetry with custom directories
               run: |
                   set -e
@@ -115,6 +117,12 @@ jobs:
                   # Display configuration
                   echo "Poetry configuration:"
                   poetry config --list
+
+                  UID=$(id -u)
+                  GID=$(id -g)
+                  sudo chown -R $UID:$GID "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}"
+                  echo "UID=$UID" >> $GITHUB_ENV
+                  echo "GID=$GID" >> $GITHUB_ENV
 
             - name: Cache Poetry directories
               uses: actions/cache@v4
@@ -199,6 +207,13 @@ jobs:
                   echo "Environment configured successfully"
                   echo "Virtual environment: \$VIRTUAL_ENV"
                   echo "Project directory: \$PROJECT_DIR"
+                  UID=$(id -u)
+                  GID=$(id -g)
+                  sudo chown -R $UID:$GID "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}" 
+                  sudo chown -R $UID:$GID "${pythonLocation}" "${env.VENV_FULL_PATH}"
+                  echo "UID=$UID" >> $GITHUB_ENV
+                  echo "GID=$GID" >> $GITHUB_ENV
+
                   EOF
                   
                   chmod +x "$ARTIFACTS_PATH/python-env.sh"
