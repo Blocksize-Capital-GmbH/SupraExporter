@@ -229,4 +229,10 @@ jobs:
                   path: ${{ env.ARTIFACTS_DIR }}
                   retention-days: 1
                   if-no-files-found: error
-                  include-hidden-files: true 
+                  include-hidden-files: true
+
+            - name: Download artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: artifacts
+                  path: artifacts/ 
