@@ -170,6 +170,7 @@ jobs:
               run: |
                   echo "Creating environment configuration script..."
                   ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
+                  pythonLocation="${{ steps.setup-python.outputs.python-path }}"
                   VENV_FULL_PATH="$VENV_FULL_PATH"
                   cat > "$ARTIFACTS_PATH/python-env.sh" << EOF
                   #!/bin/bash
@@ -177,12 +178,12 @@ jobs:
                   
                   # Python environment
                   export PYTHON_VERSION="${{ env.PYTHON_VERSION }}"
-                  export pythonLocation="${{ steps.setup-python.outputs.python-path }}"
-                  export PKG_CONFIG_PATH="${{ steps.setup-python.outputs.python-path }}/lib/pkgconfig"
-                  export Python_ROOT_DIR="${{ steps.setup-python.outputs.python-path }}"
-                  export Python2_ROOT_DIR="${{ steps.setup-python.outputs.python-path }}"
-                  export Python3_ROOT_DIR="${{ steps.setup-python.outputs.python-path }}"
-                  export LD_LIBRARY_PATH="${{ steps.setup-python.outputs.python-path }}/lib"
+                  export pythonLocation="$pythonLocation"
+                  export PKG_CONFIG_PATH="$pythonLocation/lib/pkgconfig"
+                  export Python_ROOT_DIR="$pythonLocation"
+                  export Python2_ROOT_DIR="$pythonLocation"
+                  export Python3_ROOT_DIR="$pythonLocation"
+                  export LD_LIBRARY_PATH="$pythonLocation/lib"
                   
                   # Artifacts directories
                   export ARTIFACTS_DIR="$ARTIFACTS_PATH"
@@ -190,21 +191,18 @@ jobs:
                   export POETRY_DATA_DIR="$ARTIFACTS_PATH/poetry-data"
                   
                   # Virtual environment
-                  export VIRTUAL_ENV="${{ env.VENV_FULL_PATH }}"
-                  export PATH="${{ env.VENV_FULL_PATH }}/bin:\$PATH"
+                  export VIRTUAL_ENV="$VENV_FULL_PATH"
+                  export PATH="$VENV_FULL_PATH/bin:$PATH"
                   
                   # Working directory
                   export PROJECT_DIR="$ARTIFACTS_PATH/source"
                   
                   echo "Environment configured successfully"
-                  echo "Virtual environment: \$VIRTUAL_ENV"
-                  echo "Project directory: \$PROJECT_DIR"
+                  echo "Virtual environment: $VIRTUAL_ENV"
+                  echo "Project directory: $PROJECT_DIR"
                   uid_ci=$(id -u)
                   gid_ci=$(id -g)
-                  sudo chown -R "$uid_ci":"$gid_ci" "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}" 
-                  sudo chown -R "$uid_ci":"$gid_ci" "${pythonLocation}" "${env.VENV_FULL_PATH}"
-
-
+                  sudo chown -R "$uid_ci":"$gid_ci" "$ARTIFACTS_PATH" "$pythonLocation" "$VENV_FULL_PATH"
                   EOF
                   
                   chmod +x "$ARTIFACTS_PATH/python-env.sh"
