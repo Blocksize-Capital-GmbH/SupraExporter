@@ -128,7 +128,7 @@ jobs:
                   echo "user_ci=$user_ci"
                   echo "group_ci=$group_ci" 
 
-                  sudo chown -R ${user_ci}:${group_ci} "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}"
+                  sudo chown -R "$user_ci":"$group_ci" "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}"
 
             - name: Cache Poetry directories
               uses: actions/cache@v4
