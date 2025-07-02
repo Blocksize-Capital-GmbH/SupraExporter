@@ -68,25 +68,59 @@ A production-ready Prometheus metrics exporter for Supra blockchain nodes. This 
     - Python 3.10 or higher
     - [Poetry](https://python-poetry.org/docs/#installation) for dependency management
 
-2. **Installation**:
+2. **Quick Setup (Recommended)**:
 
     ```bash
     git clone https://github.com/blocksize-capital-gmbh/supra-blockchain-metrics-exporter.git
     cd supra-blockchain-metrics-exporter
-    poetry install
+
+    # Run the automated setup script
+    ./scripts/dev-setup.sh
     ```
 
-3. **Configuration**:
+    This script will:
+
+    - Configure Poetry to use in-project virtual environment (`.venv/`)
+    - Create `.env` file from `.env.example`
+    - Install all dependencies
+    - Verify the setup
+
+3. **Manual Setup** (Alternative):
 
     ```bash
+    # Configure Poetry for local development
+    poetry config virtualenvs.in-project true --local
+    poetry config virtualenvs.create true --local
+
+    # Install dependencies
+    poetry install
+
+    # Create configuration
     cp .env.example .env
     # Edit .env with your configuration
     ```
 
 4. **Run the exporter**:
+
     ```bash
+    poetry shell  # Activate virtual environment
+    python -m supraexporter.main
+
+    # Or run directly with poetry
     poetry run python -m supraexporter.main
     ```
+
+5. **IDE Setup**:
+    - Your IDE should automatically detect the `.venv/` folder
+    - Set Python interpreter to `.venv/bin/python` (or `.venv/Scripts/python.exe` on Windows)
+    - The virtual environment is isolated and won't affect CI pipelines
+
+#### Poetry Configuration Notes
+
+- **Local Config**: The `--local` flag creates repository-specific Poetry settings that aren't committed to git
+- **CI Compatibility**: CI pipelines override Poetry config with custom virtual environment paths
+- **Team Flexibility**: Each developer can choose their preferred virtual environment location
+- **No Conflicts**: Local Poetry config won't break CI or affect other team members
 
 ## Configuration
 
@@ -354,6 +388,13 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 - Check logs: `docker logs supra_blockchain_metrics_exporter`
 - Verify environment variables are properly set
 - Ensure required files are mounted and accessible
+
+**Virtual environment issues:**
+
+- Check Poetry config: `poetry config --list`
+- Reset local config: `poetry config virtualenvs.in-project false --local`
+- Recreate environment: `poetry env remove --all && poetry install`
+- Verify Python version: `poetry env info`
 
 ### Logs and Debugging
 

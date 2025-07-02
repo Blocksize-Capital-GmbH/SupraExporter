@@ -11,6 +11,7 @@ permissions:
     packages: write
     contents: read
     actions: read
+    security-events: write
 
 env:
     PYTHON_VERSION: "3.12"
@@ -119,10 +120,10 @@ jobs:
             artifacts-dir: "artifacts"
             skip-coverage: "true"
 
-    # Security scanning
-    security_scan:
-        name: Security Scan
-        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+    # Security scanning for branches (without GitHub Security tab upload)
+    security_scan_branch:
+        name: Security Scan (Branch)
+        if: github.ref != 'refs/heads/main' && !(github.event_name == 'pull_request' && github.base_ref == 'main')
         runs-on: ubuntu-22.04
         needs: setup
         steps:
@@ -134,12 +135,32 @@ jobs:
               with:
                   scan-type: "fs"
                   scan-ref: "."
+                  format: "table"
+                  exit-code: "0"
+
+    # Security scanning
+    security_scan:
+        name: Security Scan
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
+        runs-on: ubuntu-22.04
+        needs: setup
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Run Trivy vulnerability scanner
+              id: trivy-scan
+              uses: aquasecurity/trivy-action@0.24.0
+              with:
+                  scan-type: "fs"
+                  scan-ref: "."
                   format: "sarif"
                   output: "trivy-results.sarif"
+                  exit-code: "0"
 
             - name: Upload Trivy scan results to GitHub Security tab
               uses: github/codeql-action/upload-sarif@v3
-              if: always()
+              if: always() && steps.trivy-scan.conclusion != 'skipped'
               with:
                   sarif_file: "trivy-results.sarif"
                   category: "trivy-security-scan"
