@@ -83,6 +83,10 @@ jobs:
                       exit 1
                   fi
 
+            - name: Fix permissions on artifacts directory
+              run: |
+                sudo chown -R $(id -u):$(id -g) "${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
+
             - name: Install Poetry
               run: |
                   python -m pip install --upgrade pip
@@ -179,6 +183,7 @@ jobs:
               run: |
                   echo "Creating environment configuration script..."
                   ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
+                  VENV_FULL_PATH="$VENV_FULL_PATH"
                   cat > "$ARTIFACTS_PATH/python-env.sh" << EOF
                   #!/bin/bash
                   # Environment configuration for SupraExporter CI
