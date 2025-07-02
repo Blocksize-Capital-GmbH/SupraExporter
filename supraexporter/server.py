@@ -38,9 +38,10 @@ class MetricsHandler(BaseHTTPRequestHandler):
 
 def run():
     """Start the HTTP server and serve Prometheus metrics indefinitely."""
-    server_address = ("", config.port)
+    port = 7896
+    server_address = ("", port)
     httpd = HTTPServer(server_address, MetricsHandler)
-    print(f"Serving metrics at http://localhost:{config.port}/debug/metrics/prometheus")
+    print(f"Serving metrics at http://localhost:{port}/debug/metrics/prometheus")
     httpd.serve_forever()
 
 
