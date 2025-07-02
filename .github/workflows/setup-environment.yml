@@ -122,9 +122,13 @@ jobs:
                   echo "Poetry configuration:"
                   poetry config --list
 
-                  uid_ci=$(id -u)
-                  gid_ci=$(id -g)
-                  sudo chown -R ${uid_ci}:${gid_ci} "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}"
+                  user_ci=$(id -un)
+                  group_ci=$(id -gn)
+
+                  echo "user_ci=$user_ci"
+                  echo "group_ci=$group_ci" 
+
+                  sudo chown -R ${user_ci}:${group_ci} "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}"
 
             - name: Cache Poetry directories
               uses: actions/cache@v4
