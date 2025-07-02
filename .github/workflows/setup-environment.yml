@@ -145,25 +145,20 @@ jobs:
                   echo "Poetry version: $(poetry --version)"
                   ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
                   echo "Artifacts directory: $ARTIFACTS_PATH"
-
+                  
                   echo "=== Poetry Environment Info ==="
                   cd "$ARTIFACTS_PATH/source"
                   poetry env info
-
+                  
                   echo "=== Virtual Environment Verification ==="
-                  VENV_NAME=$(cd "$ARTIFACTS_PATH/source" && poetry env info --path | xargs basename)
-                  VENV_FULL_PATH="$ARTIFACTS_PATH/venv/$VENV_NAME"
-
+                  VENV_FULL_PATH=$(poetry env info --path)
                   echo "Expected venv path: $VENV_FULL_PATH"
-
                   if [ -d "$VENV_FULL_PATH" ]; then
                       echo "✓ Virtual environment found at: $VENV_FULL_PATH"
                       echo "Size: $(du -sh "$VENV_FULL_PATH")"
                       echo "VENV_FULL_PATH=$VENV_FULL_PATH" >> $GITHUB_ENV
                   else
                       echo "✗ Virtual environment not found at expected path"
-                      echo "Searching for created virtual environments..."
-                      find "$ARTIFACTS_PATH/venv" -name "pyvenv.cfg" -type f 2>/dev/null || true
                       exit 1
                   fi
 
@@ -171,10 +166,11 @@ jobs:
               run: |
                   echo "Creating environment configuration script..."
                   ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
+                  VENV_FULL_PATH="$VENV_FULL_PATH"
                   cat > "$ARTIFACTS_PATH/python-env.sh" << EOF
                   #!/bin/bash
                   # Environment configuration for SupraExporter CI
-
+                  
                   # Python environment
                   export PYTHON_VERSION="${{ env.PYTHON_VERSION }}"
                   export pythonLocation="${{ steps.setup-python.outputs.python-path }}"
@@ -183,26 +179,26 @@ jobs:
                   export Python2_ROOT_DIR="${{ steps.setup-python.outputs.python-path }}"
                   export Python3_ROOT_DIR="${{ steps.setup-python.outputs.python-path }}"
                   export LD_LIBRARY_PATH="${{ steps.setup-python.outputs.python-path }}/lib"
-
+                  
                   # Artifacts directories
                   export ARTIFACTS_DIR="$ARTIFACTS_PATH"
                   export POETRY_CACHE_DIR="$ARTIFACTS_PATH/poetry-cache"
                   export POETRY_DATA_DIR="$ARTIFACTS_PATH/poetry-data"
-
+                  
                   # Virtual environment
-                  export VIRTUAL_ENV="${{ env.VENV_FULL_PATH }}"
-                  export PATH="${{ env.VENV_FULL_PATH }}/bin:\$PATH"
-
+                  export VIRTUAL_ENV="$VENV_FULL_PATH"
+                  export PATH="$VENV_FULL_PATH/bin:$PATH"
+                  
                   # Working directory
                   export PROJECT_DIR="$ARTIFACTS_PATH/source"
-
+                  
                   echo "Environment configured successfully"
-                  echo "Virtual environment: \$VIRTUAL_ENV"
-                  echo "Project directory: \$PROJECT_DIR"
+                  echo "Virtual environment: $VIRTUAL_ENV"
+                  echo "Project directory: $PROJECT_DIR"
                   EOF
-
+                  
                   chmod +x "$ARTIFACTS_PATH/python-env.sh"
-
+                  
                   echo "Environment configuration created:"
                   cat "$ARTIFACTS_PATH/python-env.sh"
 
