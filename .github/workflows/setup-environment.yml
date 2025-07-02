@@ -139,28 +139,18 @@ jobs:
 
             - name: Verify and prepare virtual environment
               run: |
-                  echo "=== Environment Information ==="
-                  echo "Python location: ${{ steps.setup-python.outputs.python-path }}"
-                  echo "Python version: $(python --version)"
-                  echo "Poetry version: $(poetry --version)"
-                  ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
-                  echo "Artifacts directory: $ARTIFACTS_PATH"
-                  
-                  echo "=== Poetry Environment Info ==="
-                  cd "$ARTIFACTS_PATH/source"
-                  poetry env info
-                  
-                  echo "=== Virtual Environment Verification ==="
-                  VENV_FULL_PATH=$(poetry env info --path)
-                  echo "Expected venv path: $VENV_FULL_PATH"
-                  if [ -d "$VENV_FULL_PATH" ]; then
-                      echo "✓ Virtual environment found at: $VENV_FULL_PATH"
-                      echo "Size: $(du -sh "$VENV_FULL_PATH")"
-                      echo "VENV_FULL_PATH=$VENV_FULL_PATH" >> $GITHUB_ENV
-                  else
-                      echo "✗ Virtual environment not found at expected path"
-                      exit 1
-                  fi
+                ARTIFACTS_PATH="${GITHUB_WORKSPACE}/${{ env.ARTIFACTS_DIR }}"
+                cd "$ARTIFACTS_PATH/source"
+                VENV_FULL_PATH=$(poetry env info --path)
+                echo "Expected venv path: $VENV_FULL_PATH"
+                if [ -d "$VENV_FULL_PATH" ]; then
+                    echo "✓ Virtual environment found at: $VENV_FULL_PATH"
+                    echo "Size: $(du -sh "$VENV_FULL_PATH")"
+                    echo "VENV_FULL_PATH=$VENV_FULL_PATH" >> $GITHUB_ENV
+                else
+                    echo "✗ Virtual environment not found at expected path"
+                    exit 1
+                fi
 
             - name: Create comprehensive environment configuration
               run: |
