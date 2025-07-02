@@ -122,11 +122,11 @@ jobs:
                   echo "Poetry configuration:"
                   poetry config --list
 
-                  UID=$(id -u)
-                  GID=$(id -g)
-                  sudo chown -R $UID:$GID "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}"
-                  echo "UID=$UID" >> $GITHUB_ENV
-                  echo "GID=$GID" >> $GITHUB_ENV
+                  uid_ci=$(id -u)
+                  gid_ci=$(id -g)
+                  sudo chown -R $uid_ci:$gid_ci "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}"
+                  echo "uid_ci=$uid_ci" >> $GITHUB_ENV
+                  echo "gid_ci=$gid_ci" >> $GITHUB_ENV
 
             - name: Cache Poetry directories
               uses: actions/cache@v4
@@ -212,12 +212,12 @@ jobs:
                   echo "Environment configured successfully"
                   echo "Virtual environment: \$VIRTUAL_ENV"
                   echo "Project directory: \$PROJECT_DIR"
-                  UID=$(id -u)
-                  GID=$(id -g)
-                  sudo chown -R $UID:$GID "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}" 
-                  sudo chown -R $UID:$GID "${pythonLocation}" "${env.VENV_FULL_PATH}"
-                  echo "UID=$UID" >> $GITHUB_ENV
-                  echo "GID=$GID" >> $GITHUB_ENV
+                  uid_ci=$(id -u)
+                  gid_ci=$(id -g)
+                  sudo chown -R $uid_ci:$gid_ci "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}" 
+                  sudo chown -R $uid_ci:$gid_ci "${pythonLocation}" "${env.VENV_FULL_PATH}"
+                  echo "uid_ci=$uid_ci" >> $GITHUB_ENV
+                  echo "gid_ci=$gid_ci" >> $GITHUB_ENV
 
                   EOF
                   
