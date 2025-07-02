@@ -201,8 +201,8 @@ jobs:
                   echo "Project directory: \$PROJECT_DIR"
                   uid_ci=$(id -u)
                   gid_ci=$(id -g)
-                  sudo chown -R ${uid_ci}:${gid_ci} "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}" 
-                  sudo chown -R ${uid_ci}:${gid_ci} "${pythonLocation}" "${env.VENV_FULL_PATH}"
+                  sudo chown -R "$uid_ci":"$gid_ci" "${ARTIFACTS_PATH}" "${POETRY_VENV_PATH}" "${POETRY_CACHE_DIR}" "${POETRY_DATA_DIR}" 
+                  sudo chown -R "$uid_ci":"$gid_ci" "${pythonLocation}" "${env.VENV_FULL_PATH}"
 
 
                   EOF
