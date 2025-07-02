@@ -1,6 +1,23 @@
 """Pytest fixtures for configuring environment and dummy validator logs."""
 
+import os
+
 import pytest
+
+# Set default environment variables before any imports
+os.environ["ROLE"] = "rpc"
+os.environ["RPC_URL"] = "http://mock-rpc.com"
+os.environ["RPC_LOG_PATH"] = "/tmp/mock.log"
+os.environ["PORT"] = "7896"
+os.environ["VALIDATOR_LOG_PATH"] = "/tmp/val.log"
+os.environ["NETWORK_PUBKEY"] = "PUBKEY"
+
+# Create test log files if they don't exist
+os.makedirs("/tmp", exist_ok=True)
+for log_path in ["/tmp/mock.log", "/tmp/val.log"]:
+    if not os.path.exists(log_path):
+        with open(log_path, "w") as f:
+            f.write("")
 
 
 @pytest.fixture()

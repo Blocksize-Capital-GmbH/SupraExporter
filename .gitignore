@@ -1,4 +1,9 @@
 .idea/
+# macOS system files
+.DS_Store
+.DS_Store?
+._*
+
 # Ignore Python bytecode
 __pycache__/
 *.py[cod]
