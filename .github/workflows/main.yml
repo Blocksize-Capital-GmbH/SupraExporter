@@ -28,7 +28,7 @@ jobs:
     # Main branch workflow - run all checks
     format_main:
         name: Check Code Formatting (Main)
-        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
         needs: setup
         uses: ./.github/workflows/format.yml
         with:
@@ -37,7 +37,7 @@ jobs:
 
     lint_main:
         name: Run Code Linting (Main)
-        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
         needs: setup
         uses: ./.github/workflows/lint.yml
         with:
@@ -46,7 +46,7 @@ jobs:
 
     type_check_main:
         name: Run Type Checking (Main)
-        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
         needs: setup
         uses: ./.github/workflows/type-check.yml
         with:
@@ -55,7 +55,7 @@ jobs:
 
     docstring_check_main:
         name: Check Documentation Strings (Main)
-        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
         needs: setup
         uses: ./.github/workflows/docstring-check.yml
         with:
@@ -64,7 +64,7 @@ jobs:
 
     pre_commit_all_main:
         name: Run All Pre-commit Hooks (Main)
-        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
         needs: setup
         uses: ./.github/workflows/pre-commit-all.yml
         with:
@@ -73,7 +73,7 @@ jobs:
 
     tests_main:
         name: Run Tests (Main)
-        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
         needs: setup
         uses: ./.github/workflows/tests.yml
         with:
@@ -168,7 +168,7 @@ jobs:
     # Build and push Docker for main branch or PR to main
     docker_main:
         name: Build and Push Docker Image (Main)
-        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.base_ref == 'main'
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
         needs:
             [
                 format_main,
@@ -187,18 +187,44 @@ jobs:
     docker_branch:
         name: Build and Push Docker Image (Branch)
         if: github.ref != 'refs/heads/main' && !(github.event_name == 'pull_request' && github.base_ref == 'main')
-        needs: [format_branch, lint_branch, type_check_branch, tests_branch]
+        needs:
+            [
+                format_branch,
+                lint_branch,
+                type_check_branch,
+                tests_branch,
+                security_scan_branch,
+            ]
         uses: ./.github/workflows/docker.yml
         with:
             build-type: "branch"
             branch-name: ${{ github.ref_name }}
 
-    # Final status check
-    ci_success:
-        name: CI Pipeline Success
+    # Final status check for main branch or PR to main
+    ci_success_main:
+        name: CI Pipeline Success (Main)
         runs-on: ubuntu-22.04
-        if: always()
-        needs: [docker_main, docker_branch]
+        if: always() && (github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main'))
+        needs: [docker_main]
+        steps:
+            - name: Check CI status
+              run: |
+                  if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
+                      echo "❌ CI Pipeline failed"
+                      exit 1
+                  elif [[ "${{ contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
+                      echo "⚠️ CI Pipeline was cancelled"
+                      exit 1
+                  else
+                      echo "✅ CI Pipeline completed successfully"
+                  fi
+
+    # Final status check for feature branches
+    ci_success_branch:
+        name: CI Pipeline Success (Branch)
+        runs-on: ubuntu-22.04
+        if: always() && (github.ref != 'refs/heads/main' && !(github.event_name == 'pull_request' && github.base_ref == 'main'))
+        needs: [docker_branch]
         steps:
             - name: Check CI status
               run: |
