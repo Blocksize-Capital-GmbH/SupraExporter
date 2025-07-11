@@ -11,6 +11,7 @@ on:
             - "hotfix/*"
     pull_request:
         branches: [main]
+        types: [opened, synchronize, reopened]
 
 permissions:
     packages: write
@@ -23,8 +24,27 @@ env:
     ARTIFACTS_DIR: "artifacts"
 
 jobs:
+    # Skip duplicate runs for PRs and pushes
+    skip_check:
+        name: Skip Duplicate Runs
+        runs-on: ubuntu-22.04
+        outputs:
+            should_skip: ${{ steps.skip_check.outputs.should_skip }}
+        steps:
+            - id: skip_check
+              uses: fkirc/skip-duplicate-actions@v5
+              with:
+                  # Skip concurrent runs for the same branch/PR
+                  concurrent_skipping: "same_content_newer"
+                  # Skip if a PR exists for this branch and commit
+                  skip_after_successful_duplicate: "true"
+                  # Skip based on paths if needed
+                  do_not_skip: '["workflow_dispatch", "schedule"]'
+
     setup:
         name: Setup Environment
+        needs: skip_check
+        if: needs.skip_check.outputs.should_skip != 'true'
         uses: ./.github/workflows/setup-environment.yml
         with:
             python-version: "3.12"
@@ -33,7 +53,8 @@ jobs:
     # Code quality checks - run on all branches
     format:
         name: Check Code Formatting
-        needs: setup
+        needs: [skip_check, setup]
+        if: needs.skip_check.outputs.should_skip != 'true'
         uses: ./.github/workflows/format.yml
         with:
             python-version: "3.12"
@@ -41,7 +62,8 @@ jobs:
 
     lint:
         name: Run Code Linting
-        needs: setup
+        needs: [skip_check, setup]
+        if: needs.skip_check.outputs.should_skip != 'true'
         uses: ./.github/workflows/lint.yml
         with:
             python-version: "3.12"
@@ -49,7 +71,8 @@ jobs:
 
     type_check:
         name: Run Type Checking
-        needs: setup
+        needs: [skip_check, setup]
+        if: needs.skip_check.outputs.should_skip != 'true'
         uses: ./.github/workflows/type-check.yml
         with:
             python-version: "3.12"
@@ -57,7 +80,8 @@ jobs:
 
     docstring_check:
         name: Check Documentation Strings
-        needs: setup
+        needs: [skip_check, setup]
+        if: needs.skip_check.outputs.should_skip != 'true'
         uses: ./.github/workflows/docstring-check.yml
         with:
             python-version: "3.12"
@@ -65,7 +89,8 @@ jobs:
 
     pre_commit_all:
         name: Run All Pre-commit Hooks
-        needs: setup
+        needs: [skip_check, setup]
+        if: needs.skip_check.outputs.should_skip != 'true'
         uses: ./.github/workflows/pre-commit-all.yml
         with:
             python-version: "3.12"
@@ -74,7 +99,8 @@ jobs:
     # Tests - with coverage for main/PRs, without for feature branches
     tests:
         name: Run Tests
-        needs: setup
+        needs: [skip_check, setup]
+        if: needs.skip_check.outputs.should_skip != 'true'
         uses: ./.github/workflows/tests.yml
         with:
             python-version: "3.12"
@@ -85,7 +111,8 @@ jobs:
     security_scan:
         name: Security Scan
         runs-on: ubuntu-22.04
-        needs: setup
+        needs: [skip_check, setup]
+        if: needs.skip_check.outputs.should_skip != 'true'
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -112,6 +139,7 @@ jobs:
         name: Build and Push Docker Image
         needs:
             [
+                skip_check,
                 format,
                 lint,
                 type_check,
@@ -120,6 +148,7 @@ jobs:
                 tests,
                 security_scan,
             ]
+        if: needs.skip_check.outputs.should_skip != 'true'
         uses: ./.github/workflows/docker.yml
         with:
             build-type: ${{ (github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && github.base_ref == 'main')) && 'main' || 'branch' }}
@@ -129,8 +158,8 @@ jobs:
     ci_success:
         name: CI Pipeline Success
         runs-on: ubuntu-22.04
-        if: always()
-        needs: [docker]
+        if: always() && needs.skip_check.outputs.should_skip != 'true'
+        needs: [skip_check, docker]
         steps:
             - name: Check CI status
               run: |
