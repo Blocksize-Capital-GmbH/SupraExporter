@@ -15,7 +15,7 @@
 
 # CI/CD and security-sensitive files - extra important
 # These files control builds, deployments, and security settings
-/.github/ @your-github-username
+/.github/ @abhinav2196
 /.github/workflows/ @abhinav2196
 docker-compose.yml @abhinav2196
 Dockerfile @abhinav2196
