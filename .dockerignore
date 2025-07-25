@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+.env
+.venv/
+*.zip
+node_modules/
+notebooks/
+supraexporter/tests/

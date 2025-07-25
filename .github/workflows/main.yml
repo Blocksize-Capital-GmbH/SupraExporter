@@ -1,0 +1,49 @@
+---
+name: CI Pipeline
+
+on:
+    push:
+        branches:
+            - main
+            - develop
+            - "feature/*"
+            - "hotfix/*"
+            # Temporarily removed "bug-fixes" to prevent dual triggers while PR #4 is open
+            # Will re-add after PR is merged or closed
+    pull_request:
+        branches: [main]
+        types: [opened, synchronize, reopened]
+
+permissions:
+    packages: write
+    contents: read
+    actions: read
+    security-events: write
+
+env:
+    PYTHON_VERSION: "3.12"
+    ARTIFACTS_DIR: "artifacts"
+
+jobs:
+    # ===========================================
+    # MAIN BRANCH WORKFLOW (Comprehensive)
+    # ===========================================
+    main_branch_ci:
+        name: Main Branch CI
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: ./.github/workflows/main-branch-ci.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+
+    # ===========================================
+    # FEATURE BRANCH WORKFLOW (Fast feedback)
+    # ===========================================
+    feature_branch_ci:
+        name: Feature Branch CI
+        if: github.ref != 'refs/heads/main' || github.event_name == 'pull_request'
+        uses: ./.github/workflows/feature-branch-ci.yml
+        with:
+            python-version: "3.12"
+            artifacts-dir: "artifacts"
+            branch-name: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
