@@ -1,0 +1,27 @@
+# Cache directories
+.mypy_cache/
+.pytest_cache/
+__pycache__/
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# Node modules
+node_modules/
+
+# Git
+.git/
+
+# Poetry lock file (generated)
+poetry.lock
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db

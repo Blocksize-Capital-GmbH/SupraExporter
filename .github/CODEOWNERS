@@ -1,0 +1,33 @@
+# CODEOWNERS file - defines who needs to review changes to specific files
+#
+# How it works:
+# - When someone opens a PR touching these files, GitHub automatically requests reviews
+# - If branch protection is enabled, the PR cannot merge without approval from code owners
+# - Patterns use gitignore-style syntax
+
+# Global rule: All changes need review from maintainers
+* @abhinav2196 @BSC-aujl
+
+# Critical application code - requires review from maintainers
+# This ensures core functionality changes are reviewed
+/supraexporter/ @abhinav2196 @BSC-aujl
+
+# CI/CD and security-sensitive files - extra important
+# These files control builds, deployments, and security settings
+/.github/ @abhinav2196 @BSC-aujl
+/.github/workflows/ @abhinav2196 @BSC-aujl
+docker-compose.yml @abhinav2196 @BSC-aujl
+Dockerfile @abhinav2196 @BSC-aujl
+
+# Dependency files - important for security
+# Changes to dependencies should be carefully reviewed
+pyproject.toml @abhinav2196 @BSC-aujl
+poetry.lock @abhinav2196 @BSC-aujl
+
+# Documentation - ensure quality and accuracy
+README.md @abhinav2196 @BSC-aujl
+SECURITY.md @abhinav2196 @BSC-aujl
+CONTRIBUTING.md @abhinav2196 @BSC-aujl
+
+# Note: You can add more reviewers later as your team grows
+# Example: * @your-username @team-member-2 @security-expert

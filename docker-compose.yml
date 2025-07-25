@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+    supra-metrics-exporter:
+        image: ghcr.io/blocksize-capital-gmbh/supraexporter:latest
+        container_name: supra_blockchain_metrics_exporter
+        network_mode: host
+        restart: unless-stopped
+        volumes:
+            - ./.env:/app/.env
+            - ${RPC_LOG_PATH}:${RPC_LOG_PATH}:ro
+            - ${VALIDATOR_LOG_PATH}:${VALIDATOR_LOG_PATH}:ro
