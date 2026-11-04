@@ -40,7 +40,7 @@ def mock_env_validator(monkeypatch):
 def dummy_log():
     """Provide a dummy validator log snippet for tests."""
     return """
-    Block height: (110)
+    Created Vote { author: Identity(PUBKEY), data: BlockVoteInfo { header: BlockHeader { height: 110 } } }
     Block xyz PUBKEY
     View abc PUBKEY
     """

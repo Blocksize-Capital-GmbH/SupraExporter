@@ -19,12 +19,16 @@ def read_last_n_lines(filepath: str, n: int = 100000) -> str:
 
 
 def parse_block_height(log_data: str) -> int:
-    """Extract the most recent block height from the log file.
+    """Extract the block height this validator most recently voted on.
 
-    Expected pattern: "Block height: (12345678)".
+    Only the validator's own "Created Vote" lines count. Heights in messages
+    received from other validators reflect the network, not this node, and
+    would make a stuck validator look healthy.
     """
-    pattern = re.compile(r"Block height: \((\d+)\)")
+    pattern = re.compile(r"\bheight: (\d+)")
     for line in reversed(log_data.splitlines()):
+        if "Created Vote" not in line:
+            continue
         match = pattern.search(line)
         if match:
             return int(match.group(1))
