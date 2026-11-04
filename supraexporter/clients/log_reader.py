@@ -21,9 +21,10 @@ def read_last_n_lines(filepath: str, n: int = 100000) -> str:
 def parse_block_height(log_data: str) -> int:
     """Extract the most recent block height from the log file.
 
-    Expected pattern: "Block height: (12345678)".
+    Matches the current format "height: 12345678" and the legacy
+    format "Block height: (12345678)".
     """
-    pattern = re.compile(r"Block height: \((\d+)\)")
+    pattern = re.compile(r"\bheight: \(?(\d+)\)?")
     for line in reversed(log_data.splitlines()):
         match = pattern.search(line)
         if match:
