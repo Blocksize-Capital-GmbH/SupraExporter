@@ -9,22 +9,22 @@ from supraexporter.clients.log_reader import (
 )
 
 
-def test_parse_block_height_found():
+def test_parse_block_height_from_own_votes():
     log_data = """
-    Some random logs
-    Block height: (123456)
-    More lines
+    DEBUG moonshot::core: Created Vote { author: Identity(abc), data: BlockVoteInfo { header: BlockHeader { height: 57935725 } } }
+    DEBUG moonshot::core: Created Vote { author: Identity(abc), data: BlockVoteInfo { header: BlockHeader { height: 57935726 } } }
+    DEBUG moonshot::core: Created Vote { author: Identity(abc), data: BatchInfo { epoch_id: EpochId { epoch: 8557 } } }
+    DEBUG certifier: Processing Proposal { block_height: 57935727, epoch_id: 8557 }
     """
-    assert parse_block_height(log_data) == 123456
+    assert parse_block_height(log_data) == 57935726
 
 
-def test_parse_block_height_current_format():
+def test_parse_block_height_ignores_messages_from_other_validators():
     log_data = """
-    DEBUG moonshot::core: Dropping message: Vote(Vote { header: BlockHeader { height: 57927885, parent: abc } })
-    DEBUG certifier: Processing Proposal { block_height: 57927887, epoch_id: 8556 }
+    DEBUG moonshot::core: Created Vote { author: Identity(abc), data: TimeoutInfo { locked: QC(BlockHeader { height: 55358512 }) } }
     DEBUG moonshot::core: Dropping message: Vote(Vote { header: BlockHeader { height: 57927886, parent: def } })
     """
-    assert parse_block_height(log_data) == 57927886
+    assert parse_block_height(log_data) == 55358512
 
 
 def test_parse_block_height_not_found():
